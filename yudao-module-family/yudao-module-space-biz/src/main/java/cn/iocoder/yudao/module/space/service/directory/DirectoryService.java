@@ -1,11 +1,12 @@
 package cn.iocoder.yudao.module.space.service.directory;
 
-import java.util.*;
-import javax.validation.*;
-import cn.iocoder.yudao.module.space.controller.admin.directory.vo.*;
-import cn.iocoder.yudao.module.space.dal.dataobject.directory.DirectoryDO;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.framework.common.pojo.PageParam;
+import cn.iocoder.yudao.module.space.controller.admin.directory.vo.DirectoryPageReqVO;
+import cn.iocoder.yudao.module.space.controller.admin.directory.vo.DirectorySaveReqVO;
+import cn.iocoder.yudao.module.space.dal.dataobject.directory.DirectoryDO;
+import cn.iocoder.yudao.module.space.mq.message.source.SourceChangeMessage;
+
+import javax.validation.Valid;
 
 /**
  * 目录 Service 接口
@@ -51,5 +52,17 @@ public interface DirectoryService {
      * @return 目录分页
      */
     PageResult<DirectoryDO> getDirectoryPage(DirectoryPageReqVO pageReqVO);
+
+    /**
+     * 重新构建源下面的目录
+     *
+     * @param message 源变更 消息
+     * @return
+     */
+    void doSourceChange(SourceChangeMessage message);
+
+    /**
+     * 建立树形结构
+     */
 
 }

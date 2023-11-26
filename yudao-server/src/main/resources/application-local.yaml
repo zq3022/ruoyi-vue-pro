@@ -188,7 +188,10 @@ logging:
     cn.iocoder.yudao.module.trade.dal.mysql: debug
     cn.iocoder.yudao.module.promotion.dal.mysql: debug
     cn.iocoder.yudao.module.statistics.dal.mysql: debug
-    cn.iocoder.yudao.module.photo.dal.mysql: debug
+    cn.iocoder.yudao.module.space.dal.mysql: debug
+    cn.iocoder.yudao.module.album.dal.mysql: debug
+    cn.iocoder.yudao.module.video.dal.mysql: debug
+    cn.iocoder.yudao.module.music.dal.mysql: debug
 
 debug: false
 
