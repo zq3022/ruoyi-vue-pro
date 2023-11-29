@@ -4,9 +4,10 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.space.controller.admin.directory.vo.DirectoryPageReqVO;
 import cn.iocoder.yudao.module.space.controller.admin.directory.vo.DirectorySaveReqVO;
 import cn.iocoder.yudao.module.space.dal.dataobject.directory.DirectoryDO;
-import cn.iocoder.yudao.module.space.mq.message.source.SourceChangeMessage;
+import cn.iocoder.yudao.module.space.mq.message.source.SourceMessage;
 
 import javax.validation.Valid;
+import java.io.IOException;
 
 /**
  * 目录 Service 接口
@@ -54,15 +55,10 @@ public interface DirectoryService {
     PageResult<DirectoryDO> getDirectoryPage(DirectoryPageReqVO pageReqVO);
 
     /**
-     * 重新构建源下面的目录
+     * 处理目录源的消息
      *
      * @param message 源变更 消息
      * @return
      */
-    void doSourceChange(SourceChangeMessage message);
-
-    /**
-     * 建立树形结构
-     */
-
+    void doSourceMessage(SourceMessage message) throws IOException;
 }

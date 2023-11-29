@@ -6,8 +6,16 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class SourceChangeMessage {
-    public static final String TOPIC = "SOURCE_CHANGE_MESSAGE";
+public class SourceMessage {
+    public static final String TOPIC = "SOURCE_MESSAGE";
+
+    /**
+     * 消息类型
+     *
+     * 枚举 {@link cn.iocoder.yudao.module.space.enums.DictTypeConstants} MESSAGE_MQ_TYPE
+     */
+    @NotNull(message = "消息类型不能为空")
+    private Integer messageType;
 
     /**
      * 目录源编号
@@ -28,4 +36,9 @@ public class SourceChangeMessage {
      */
     @NotNull(message = "源类型不能为空")
     private Integer type;
+
+    /**
+     * 旧的源目录路径（仅用于更新）
+     */
+    private String oldPath;
 }
