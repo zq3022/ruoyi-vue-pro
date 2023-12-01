@@ -9,9 +9,7 @@ import cn.iocoder.yudao.module.space.dal.dataobject.directory.DirectoryDO;
 import cn.iocoder.yudao.module.space.dal.mysql.directory.DirectoryMapper;
 import cn.iocoder.yudao.module.space.enums.MessageTypeEnum;
 import cn.iocoder.yudao.module.space.mq.message.source.SourceMessage;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.SneakyThrows;
@@ -32,7 +30,6 @@ import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.space.enums.ErrorCodeConstants.DIRECTORY_NOT_EXISTS;
-import static java.util.Objects.requireNonNull;
 
 /**
  * 目录 Service 实现类
@@ -93,19 +90,18 @@ public class DirectoryServiceImpl implements DirectoryService {
      * 处理目录源的消息
      *
      * @param message 源变更 消息
-     * @return
      */
     @Override
     @Transactional
     public void doSourceMessage(SourceMessage message) throws IOException {
-        log.info("重新构建源下面的目录结构,{}",message.getId());
+        log.info("重新构建源下面的目录结构,{}",message.getSourceId());
         switch (MessageTypeEnum.valueOf(message.getMessageType())) {
             case ADD: // 新增源
                 createTree(message);
                 break;
             case DELETE:
                 // 删除源
-                deleteTreeBySource(message.getId());
+                deleteTreeBySource(message.getSourceId());
                 break;
             case UPDATE:
                 updateTree(message);
@@ -122,7 +118,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     private void createTree(SourceMessage message) throws IOException {
         final Long[] idx = {1L}; // lft
         final Integer[] level = {1}; // level
-        Long sourceId = message.getId();
+        Long sourceId = message.getSourceId();
         Stack<DirectoryDO> stack = new Stack<>();
         List<DirectoryDO> col = new ArrayList<>();
         Files.walkFileTree(Paths.get(message.getPath()),
@@ -155,28 +151,38 @@ public class DirectoryServiceImpl implements DirectoryService {
         Path oldPath = Paths.get(message.getOldPath());
         Path newPath = Paths.get(message.getPath());
 
-        // 新路径和旧的路径是同一个文件夹，无需调整树
+        // 新源目录和旧的路径根目录是同一个文件夹，无需调整树
         if(FileUtil.toAbsNormal(oldPath).equals(FileUtil.toAbsNormal(newPath))) {
-           return;
+            log.info("新源目录和旧的路径根目录是同一个文件夹，无需调整树");
+            return;
         }
 
-        // 新的文件夹是旧文件夹的子孙文件夹，即新的源目录指向了旧源的子文件夹
+        // 新源目录是旧源目录的子孙文件夹，即新的源目录指向了旧源的子文件夹,修剪树
         if (FileUtil.isSub(oldPath, newPath)) {
             // 1. 找到新的根目录在旧树中的节点newRoot
-            DirectoryDO newRoot = findNodeByPathInTree(message.getId(), oldPath, newPath);
-            // 2. 调整树
-            reduceTree(newRoot);
-            return;
+            DirectoryDO newRoot = findNodeByPathInTree(message.getSourceId(), oldPath, newPath);
+            if (newRoot != null) {
+                log.info("新源目录是旧源目录的子孙文件夹，修剪树");
+                // 2. 调整树
+                reduceTree(newRoot);
+                return;
+            }
         }
 
-        // 新的文件夹是旧文件夹的祖先文件夹，即新的源目录指向了旧源的祖先文件夹
+        // 新源目录是旧源目录的祖先文件夹，即新的源目录指向了旧源的祖先文件夹，膨胀树
         if (FileUtil.isSub(newPath, oldPath)) {
-            dilateTree(message.getId(), message.getOldPath(), message.getPath());
-            return;
+            // oldRoot
+            DirectoryDO oldRoot = directoryMapper.selectOne(DirectoryDO::getSourceId, message.getSourceId(), DirectoryDO::getLevel, 1, DirectoryDO::getLft, 1L);
+            if (oldRoot != null) {
+                log.info("新源目录是旧源目录的祖先文件夹，膨胀树");
+                dilateTree(message.getSourceId(), message.getOldPath(), message.getPath(), oldRoot);
+                return;
+            }
         }
 
-        // 无父子关系，删除旧的树，构建新的树
-        deleteTreeBySource(message.getId());
+        // 新源目录是旧源目录无父子关系，删除旧的树，构建新的树
+         log.info("新源目录是旧源目录无父子关系，删除旧的树，构建新的树");
+        deleteTreeBySource(message.getSourceId());
         createTree(message);
     }
 
@@ -212,11 +218,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 
     // TODO
     // 膨胀树，即旧树的根节点变更为新树的某个子节点，保持旧树中的节点的id不变
-    private void dilateTree(Long sourceId, String oldPath, String newDilatePath) throws IOException {
-        // oldRoot
-        DirectoryDO oldRoot = directoryMapper.selectOne(DirectoryDO::getSourceId, sourceId, DirectoryDO::getLevel, 1, DirectoryDO::getLft, 1L);
-        requireNonNull(oldRoot, "找不到需要膨胀的树");
-
+    private void dilateTree(Long sourceId, String oldPath, String newDilatePath, DirectoryDO oldRoot) throws IOException {
         Long offset = oldRoot.getRgt() - oldRoot.getLft(); // oldRoot的lft和rgt的差值
         File oldRootFile= FileUtils.getFile(oldPath);
 

@@ -38,7 +38,7 @@ public class SourceServiceImpl implements SourceService {
         SourceDO source = BeanUtils.toBean(createReqVO, SourceDO.class);
         sourceMapper.insert(source);
         // 发送`新增源`的mq消息
-        sourceChangeProducer.sendSourceAddMessage(SpaceSourceConvert.INSTANCE.convert(source));
+        sourceChangeProducer.sendSourceAddMessage(SpaceSourceConvert.INSTANCE.convert(source).setSourceId(source.getId()));
         // 返回
         return source.getId();
     }
@@ -52,6 +52,7 @@ public class SourceServiceImpl implements SourceService {
         sourceMapper.updateById(updateObj);
         // 发送`修改源`mq消息
         SourceMessage sourceMessage = SpaceSourceConvert.INSTANCE.convert(updateObj);
+        sourceMessage.setSourceId(updateObj.getId());
         sourceMessage.setOldPath(oldSource.getPath());
         sourceChangeProducer.sendSourceUpdateMessage(sourceMessage);
     }
@@ -63,7 +64,7 @@ public class SourceServiceImpl implements SourceService {
         // 删除
         sourceMapper.deleteById(id);
         // 发送`删除源`mq消息
-        sourceChangeProducer.sendSourceDeleteMessage(SpaceSourceConvert.INSTANCE.convert(oldSource));
+        sourceChangeProducer.sendSourceDeleteMessage(SpaceSourceConvert.INSTANCE.convert(oldSource).setSourceId(oldSource.getId()));
     }
 
     private SourceDO validateSourceExists(Long id) {

@@ -8,20 +8,26 @@ import javax.validation.constraints.NotNull;
 @Data
 public class SourceMessage {
     public static final String TOPIC = "SOURCE_MESSAGE";
+    public static final String SOURCE_NO_PREFIX = "S";
 
     /**
      * 消息类型
-     *
      * 枚举 {@link cn.iocoder.yudao.module.space.enums.DictTypeConstants} MESSAGE_MQ_TYPE
      */
     @NotNull(message = "消息类型不能为空")
     private Integer messageType;
 
     /**
+     * 目录源消息序号
+     */
+    @NotBlank(message = "源消息序号不能为空")
+    private String no;
+
+    /**
      * 目录源编号
      */
     @NotNull(message = "源Id不能为空")
-    private Long id;
+    private Long sourceId;
 
     /**
      * 目录路径
@@ -31,7 +37,6 @@ public class SourceMessage {
 
     /**
      * 源类型
-     *
      * 枚举 {@link cn.iocoder.yudao.module.space.enums.DictTypeConstants}
      */
     @NotNull(message = "源类型不能为空")
