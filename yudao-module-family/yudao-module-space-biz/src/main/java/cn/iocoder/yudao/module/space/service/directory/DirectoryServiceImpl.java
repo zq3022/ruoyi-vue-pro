@@ -94,7 +94,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     @Override
     @Transactional
     public void doSourceMessage(SourceMessage message) throws IOException {
-        log.info("重新构建源下面的目录结构,{}",message.getSourceId());
+        log.info("处理目录源的消息,{}",message.getSourceId());
         switch (MessageTypeEnum.valueOf(message.getMessageType())) {
             case ADD: // 新增源
                 createTree(message);

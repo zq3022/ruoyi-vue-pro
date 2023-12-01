@@ -9,12 +9,17 @@ import cn.iocoder.yudao.module.space.dal.dataobject.source.SourceDO;
 import cn.iocoder.yudao.module.space.dal.mysql.source.SourceMapper;
 import cn.iocoder.yudao.module.space.mq.message.source.SourceMessage;
 import cn.iocoder.yudao.module.space.mq.producer.SourceProducer;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import javax.annotation.Resource;
 
+import java.io.File;
+
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.module.space.enums.ErrorCodeConstants.SOURCE_EXISTS_INCLUSION;
 import static cn.iocoder.yudao.module.space.enums.ErrorCodeConstants.SOURCE_NOT_EXISTS;
 
 /**
@@ -35,6 +40,7 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public Long createSource(SourceSaveReqVO createReqVO) {
         // 插入
+        checkSourceExistSub(null, createReqVO.getPath(), createReqVO.getType());
         SourceDO source = BeanUtils.toBean(createReqVO, SourceDO.class);
         sourceMapper.insert(source);
         // 发送`新增源`的mq消息
@@ -47,6 +53,7 @@ public class SourceServiceImpl implements SourceService {
     public void updateSource(SourceSaveReqVO updateReqVO) {
         // 校验存在
         SourceDO oldSource = validateSourceExists(updateReqVO.getId());
+        checkSourceExistSub(updateReqVO.getId(), updateReqVO.getPath(), updateReqVO.getType());
         // 更新
         SourceDO updateObj = BeanUtils.toBean(updateReqVO, SourceDO.class);
         sourceMapper.updateById(updateObj);
@@ -73,6 +80,19 @@ public class SourceServiceImpl implements SourceService {
             throw exception(SOURCE_NOT_EXISTS);
         }
         return sourceDO;
+    }
+
+    // 检查需要新增/修改的目录源是否存在包含关系的源
+    private void checkSourceExistSub(Long oldSourceId, String newPath, Integer newType) {
+        String newPathStr = new File(newPath).getAbsolutePath();
+        LambdaQueryWrapper<SourceDO> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.eq(SourceDO::getType, newType)
+                .ne(oldSourceId != null, SourceDO::getId, oldSourceId)
+               .and(w -> w.likeRight(SourceDO::getPath, newPathStr).or().apply(" path = left({0}, char_length(path)) ",newPath));
+        boolean exists = sourceMapper.exists(queryWrapper);
+        if (exists) {
+            throw exception(SOURCE_EXISTS_INCLUSION);
+        }
     }
 
     @Override
