@@ -58,7 +58,7 @@ public interface DirectoryService {
      * 处理目录源的消息
      *
      * @param message 源变更 消息
-     * @return
      */
     void doSourceMessage(SourceMessage message) throws IOException;
+
 }

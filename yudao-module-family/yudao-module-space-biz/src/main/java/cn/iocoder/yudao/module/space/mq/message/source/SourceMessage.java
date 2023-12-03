@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 @Data
 public class SourceMessage {
     public static final String TOPIC = "SOURCE_MESSAGE";
-    public static final String SOURCE_NO_PREFIX = "S";
+    public static final String MESSAGE_NO_PREFIX = "SS"; // space source
 
     /**
      * 消息类型

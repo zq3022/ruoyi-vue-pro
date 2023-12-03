@@ -1,13 +1,15 @@
 package cn.iocoder.yudao.module.space.dal.mysql.directory;
 
-import java.util.*;
-
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
+import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
+import cn.iocoder.yudao.module.space.controller.admin.directory.vo.DirectoryPageReqVO;
 import cn.iocoder.yudao.module.space.dal.dataobject.directory.DirectoryDO;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import org.apache.ibatis.annotations.Mapper;
-import cn.iocoder.yudao.module.space.controller.admin.directory.vo.*;
+
+import java.util.List;
 
 /**
  * 目录 Mapper
@@ -28,4 +30,43 @@ public interface DirectoryMapper extends BaseMapperX<DirectoryDO> {
                 .orderByDesc(DirectoryDO::getId));
     }
 
+    default void deleteBySource(Long sourceId) {
+        delete(new LambdaQueryWrapperX<DirectoryDO>().eq(DirectoryDO::getSourceId, sourceId));
+    }
+
+    /**
+     * 删除所有的父节点和兄弟节点
+     * 注意：删除之后并不调整subTree的lft、rgt、level
+     * @param subTreeRoot 子树的根节点
+     */
+    default List<DirectoryDO> deleteParentsAndSiblingsBySubTreeRoot(DirectoryDO subTreeRoot) {
+        LambdaQueryWrapper<DirectoryDO> queryWrapperX = new LambdaQueryWrapperX<DirectoryDO>()
+                .eq(DirectoryDO::getSourceId, subTreeRoot.getSourceId())
+                .and(w -> w.gt(DirectoryDO::getRgt, subTreeRoot.getRgt())
+                        .or()
+                        .lt(DirectoryDO::getLft, subTreeRoot.getLft()));
+        List<DirectoryDO> deletedList = selectList(queryWrapperX);
+        delete(queryWrapperX);
+        return deletedList;
+    }
+
+    /**
+     * 用于删除所有的父节点和兄弟节点，之后的lft、rgt、level调整\
+     * @param sourceId 源id
+     * @param leftOffset lft偏移量
+     * @param levelOffset level偏移量
+     */
+    default void reconstructedOffsetByRoot(Long sourceId, Long leftOffset, Integer levelOffset){
+        update(new LambdaUpdateWrapper<DirectoryDO>()
+                .eq(DirectoryDO::getSourceId, sourceId)
+                .setSql("lft = lft - {0}", leftOffset)
+                .setSql("rgt = rgt - {0}", leftOffset)
+                .setSql("level = level - {0}", levelOffset)
+        );
+    }
+
+    default List<DirectoryDO> selectBySource(Long sourceId){
+        return selectList(new LambdaUpdateWrapper<DirectoryDO>()
+                .eq(DirectoryDO::getSourceId, sourceId));
+    }
 }

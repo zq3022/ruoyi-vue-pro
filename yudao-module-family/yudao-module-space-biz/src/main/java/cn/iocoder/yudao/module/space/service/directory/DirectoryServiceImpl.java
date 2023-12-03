@@ -9,9 +9,7 @@ import cn.iocoder.yudao.module.space.dal.dataobject.directory.DirectoryDO;
 import cn.iocoder.yudao.module.space.dal.mysql.directory.DirectoryMapper;
 import cn.iocoder.yudao.module.space.enums.MessageTypeEnum;
 import cn.iocoder.yudao.module.space.mq.message.source.SourceMessage;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import cn.iocoder.yudao.module.space.mq.producer.DirectoryProducer;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -21,12 +19,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import javax.annotation.Resource;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Stack;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.space.enums.ErrorCodeConstants.DIRECTORY_NOT_EXISTS;
@@ -43,6 +43,8 @@ public class DirectoryServiceImpl implements DirectoryService {
 
     @Resource
     private DirectoryMapper directoryMapper;
+    @Resource
+    private DirectoryProducer directoryProducer;
 
     @Override
     public Long createDirectory(DirectorySaveReqVO createReqVO) {
@@ -95,27 +97,38 @@ public class DirectoryServiceImpl implements DirectoryService {
     @Transactional
     public void doSourceMessage(SourceMessage message) throws IOException {
         log.info("处理目录源的消息,{}",message.getSourceId());
+        List<DirectoryDO> createdCol = new ArrayList<>();
+        List<DirectoryDO> deletedCol = new ArrayList<>();
         switch (MessageTypeEnum.valueOf(message.getMessageType())) {
             case ADD: // 新增源
-                createTree(message);
+                createdCol = createTree(message);
                 break;
             case DELETE:
                 // 删除源
-                deleteTreeBySource(message.getSourceId());
+                deletedCol = deleteTree(message);
                 break;
             case UPDATE:
-                updateTree(message);
+                updateTree(message, createdCol, deletedCol);
                 break;
+        }
+
+        // 发送文件夹变更的消息
+        if (!createdCol.isEmpty()) {
+            directoryProducer.sendCreatedMessages(createdCol, String.valueOf(message.getSourceId()));
+        }
+
+        if (!deletedCol.isEmpty()) {
+            directoryProducer.sendDeletedMessages(deletedCol, String.valueOf(message.getSourceId()));
         }
     }
 
-    private void deleteTreeBySource(Long sourceId) {
-        LambdaQueryWrapper<DirectoryDO> queryWrapper = Wrappers.lambdaQuery(DirectoryDO.class);
-        queryWrapper.eq(DirectoryDO::getSourceId, sourceId);
-        directoryMapper.delete(queryWrapper);
+    private List<DirectoryDO> deleteTree(SourceMessage message) {
+        List<DirectoryDO> list = directoryMapper.selectBySource(message.getSourceId());
+        directoryMapper.deleteBySource(message.getSourceId());
+        return list;
     }
 
-    private void createTree(SourceMessage message) throws IOException {
+    private List<DirectoryDO> createTree(SourceMessage message) throws IOException {
         final Long[] idx = {1L}; // lft
         final Integer[] level = {1}; // level
         Long sourceId = message.getSourceId();
@@ -145,9 +158,11 @@ public class DirectoryServiceImpl implements DirectoryService {
             }
         });
         directoryMapper.insertBatch(col);
+        return col;
     }
 
-    private void updateTree(SourceMessage message) throws IOException {
+    // 注意，updateTree内部，不得改变createdCol及deleteCol的引用
+    private void updateTree(SourceMessage message, final List<DirectoryDO> createdCol, final List<DirectoryDO> deletedCol) throws IOException {
         Path oldPath = Paths.get(message.getOldPath());
         Path newPath = Paths.get(message.getPath());
 
@@ -163,8 +178,8 @@ public class DirectoryServiceImpl implements DirectoryService {
             DirectoryDO newRoot = findNodeByPathInTree(message.getSourceId(), oldPath, newPath);
             if (newRoot != null) {
                 log.info("新源目录是旧源目录的子孙文件夹，修剪树");
-                // 2. 调整树
-                reduceTree(newRoot);
+                // 2. 修剪树
+                reduceTree(newRoot, deletedCol);
                 return;
             }
         }
@@ -175,36 +190,24 @@ public class DirectoryServiceImpl implements DirectoryService {
             DirectoryDO oldRoot = directoryMapper.selectOne(DirectoryDO::getSourceId, message.getSourceId(), DirectoryDO::getLevel, 1, DirectoryDO::getLft, 1L);
             if (oldRoot != null) {
                 log.info("新源目录是旧源目录的祖先文件夹，膨胀树");
-                dilateTree(message.getSourceId(), message.getOldPath(), message.getPath(), oldRoot);
+                createdCol.addAll(dilateTree(message.getSourceId(), message.getOldPath(), message.getPath(), oldRoot));
                 return;
             }
         }
 
         // 新源目录是旧源目录无父子关系，删除旧的树，构建新的树
          log.info("新源目录是旧源目录无父子关系，删除旧的树，构建新的树");
-        deleteTreeBySource(message.getSourceId());
-        createTree(message);
+        deletedCol.addAll(directoryMapper.selectBySource(message.getSourceId()));
+        directoryMapper.deleteBySource(message.getSourceId());
     }
 
     // 缩小树
-    private void reduceTree(DirectoryDO newRoot) {
+    private void reduceTree(DirectoryDO newRoot, final List<DirectoryDO> deletedCol) {
         // 1. 删除所有lft<newRoot并且rgt>newRoot的节点
-        LambdaQueryWrapper<DirectoryDO> queryWrapper = Wrappers.lambdaQuery(DirectoryDO.class);
-        queryWrapper.eq(DirectoryDO::getSourceId, newRoot.getSourceId())
-                .and(w -> w.gt(DirectoryDO::getRgt, newRoot.getRgt())
-                        .or()
-                        .lt(DirectoryDO::getLft, newRoot.getLft()));
-        directoryMapper.delete(queryWrapper);
+        deletedCol.addAll(directoryMapper.deleteParentsAndSiblingsBySubTreeRoot(newRoot));
 
         // 2. 调整新的树的lft和rgt及level
-        Integer levelOffset = newRoot.getLevel() - 1;
-        Long lftOffset = newRoot.getLft() - 1;
-        LambdaUpdateWrapper<DirectoryDO> updateWrapper = Wrappers.lambdaUpdate(DirectoryDO.class);
-        updateWrapper.eq(DirectoryDO::getSourceId, newRoot.getSourceId())
-                .setSql("lft = lft - {0}", lftOffset)
-                .setSql("rgt = rgt - {0}", lftOffset)
-                .setSql("level = level - {0}", levelOffset);
-        directoryMapper.update(updateWrapper);
+        directoryMapper.reconstructedOffsetByRoot(newRoot.getSourceId(), newRoot.getLft() - 1, newRoot.getLevel() - 1);
     }
 
     // 在old树中找寻节点
@@ -212,13 +215,11 @@ public class DirectoryServiceImpl implements DirectoryService {
         // 要找的节点所在的level,注意根节点level为1
         Integer level = newPath.getNameCount() - oldPath.getNameCount() + 1; // 目录所在层级
         String nodeName = newPath.getFileName().toString(); // 目录名
-        //
         return directoryMapper.selectOne(DirectoryDO::getSourceId, sourceId, DirectoryDO::getLevel, level, DirectoryDO::getName, nodeName);
     }
 
-    // TODO
     // 膨胀树，即旧树的根节点变更为新树的某个子节点，保持旧树中的节点的id不变
-    private void dilateTree(Long sourceId, String oldPath, String newDilatePath, DirectoryDO oldRoot) throws IOException {
+    private List<DirectoryDO> dilateTree(Long sourceId, String oldPath, String newDilatePath, DirectoryDO oldRoot) throws IOException {
         Long offset = oldRoot.getRgt() - oldRoot.getLft(); // oldRoot的lft和rgt的差值
         File oldRootFile= FileUtils.getFile(oldPath);
 
@@ -264,15 +265,11 @@ public class DirectoryServiceImpl implements DirectoryService {
                     }
                 });
         // 2. 调整旧树的lft、rgt及level，保持id不变
-        LambdaUpdateWrapper<DirectoryDO> updateWrapper = Wrappers.lambdaUpdate(DirectoryDO.class);
-        updateWrapper.eq(DirectoryDO::getSourceId, sourceId)
-                .setSql("lft = lft + {0}", oldRootReplace[0].getLft() - oldRoot.getLft() )
-                .setSql("rgt = rgt + {0}", oldRootReplace[0].getLft() - oldRoot.getLft())
-                .setSql("level = level + {0}", oldRootReplace[0].getLevel() - 1);
-        directoryMapper.update(updateWrapper);
+        directoryMapper.reconstructedOffsetByRoot(sourceId, oldRoot.getLft() - oldRootReplace[0].getLft(), 1 - oldRootReplace[0].getLevel() );
 
         // 3. 插入新的树
         directoryMapper.insertBatch(col);
+        return col;
     }
 
 }

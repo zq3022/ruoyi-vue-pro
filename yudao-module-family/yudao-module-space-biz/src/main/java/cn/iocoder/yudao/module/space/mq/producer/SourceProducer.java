@@ -9,8 +9,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
-import static cn.iocoder.yudao.module.space.mq.message.source.SourceMessage.SOURCE_NO_PREFIX;
-
 @Component
 @Slf4j
 public class SourceProducer {
@@ -27,9 +25,8 @@ public class SourceProducer {
      * @param message 源目录新增的消息
      */
     public void sendSourceAddMessage(SourceMessage message) {
-        message.setMessageType(MessageTypeEnum.ADD.getValue());
-        message.setNo(messageNoRedisDAO.generate(SOURCE_NO_PREFIX));
-        rocketMQTemplate.syncSend(SourceMessage.TOPIC, message); // 重点：使用 RocketMQTemplate 同步发送源目录新增的消息
+        // 重点：使用 RocketMQTemplate 同步发送源目录新增的消息
+        sendSourceMessage(message, MessageTypeEnum.ADD.getValue());
     }
 
     /**
@@ -38,9 +35,8 @@ public class SourceProducer {
      * @param message 源目录删除的消息
      */
     public void sendSourceDeleteMessage(SourceMessage message) {
-        message.setMessageType(MessageTypeEnum.DELETE.getValue());
-        message.setNo(messageNoRedisDAO.generate(SOURCE_NO_PREFIX));
-        rocketMQTemplate.syncSend(SourceMessage.TOPIC, message); // 重点：使用 RocketMQTemplate 同步发送源目录删除的消息
+        // 重点：使用 RocketMQTemplate 同步发送源目录删除的消息
+        sendSourceMessage(message, MessageTypeEnum.DELETE.getValue());
     }
 
     /**
@@ -49,8 +45,13 @@ public class SourceProducer {
      * @param message 源目录更新的消息
      */
     public void sendSourceUpdateMessage(SourceMessage message) {
-        message.setMessageType(MessageTypeEnum.UPDATE.getValue());
-        message.setNo(messageNoRedisDAO.generate(SOURCE_NO_PREFIX));
-        rocketMQTemplate.syncSend(SourceMessage.TOPIC, message); // 重点：使用 RocketMQTemplate 同步发送源目录变更的消息
+        // 重点：使用 RocketMQTemplate 同步发送源目录变更的消息
+        sendSourceMessage(message, MessageTypeEnum.UPDATE.getValue());
+    }
+
+    private void sendSourceMessage(SourceMessage message, Integer messageType) {
+        message.setMessageType(messageType);
+        message.setNo(messageNoRedisDAO.generateSourceMessageNo());
+        rocketMQTemplate.syncSend(SourceMessage.TOPIC, message); // 重点：使用 RocketMQTemplate 同步发送源目录消息
     }
 }

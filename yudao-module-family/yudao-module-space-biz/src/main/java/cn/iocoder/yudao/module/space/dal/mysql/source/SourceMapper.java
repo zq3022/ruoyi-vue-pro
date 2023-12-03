@@ -1,13 +1,13 @@
 package cn.iocoder.yudao.module.space.dal.mysql.source;
 
-import java.util.*;
-
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
+import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
+import cn.iocoder.yudao.module.space.controller.admin.source.vo.SourcePageReqVO;
 import cn.iocoder.yudao.module.space.dal.dataobject.source.SourceDO;
 import org.apache.ibatis.annotations.Mapper;
-import cn.iocoder.yudao.module.space.controller.admin.source.vo.*;
+
+import java.util.List;
 
 /**
  * 目录源 Mapper
@@ -25,4 +25,12 @@ public interface SourceMapper extends BaseMapperX<SourceDO> {
                 .orderByDesc(SourceDO::getId));
     }
 
+    default List<SourceDO> listParentSubRelationSource(Long oldSourceId, String newPath, Integer newType) {
+        return selectList(new LambdaQueryWrapperX<SourceDO>()
+                .eq(SourceDO::getType, newType)
+                .ne(oldSourceId != null, SourceDO::getId, oldSourceId)
+                .and(w -> w.likeRight(SourceDO::getPath, newPath)
+                        .or()
+                        .apply(" path = left({0}, char_length(path)) ",newPath)));
+    }
 }

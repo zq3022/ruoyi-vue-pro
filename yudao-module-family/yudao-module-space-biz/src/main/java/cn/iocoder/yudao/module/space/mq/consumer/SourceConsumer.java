@@ -27,14 +27,13 @@ public class SourceConsumer implements RocketMQListener<SourceMessage> {
     @Override
     @SneakyThrows
     public void onMessage(SourceMessage message) {
-        log.info("[onMessage][源目录消息{}]", message);
+        log.info("[onMessage][目录源,{}]", message);
         sourceConsumerLockRedisDAO.lock(message.getNo(), 20000L, () -> {
             try {
                 directoryService.doSourceMessage(message);
             } catch (Exception e) {
-                log.error("[onMessage][执行源目录消息失败，message({}) 异常({})]", message, e);
+                log.error("[onMessage][执行目录源消息失败，message({}) 异常({})]", message, e);
             }
         });
-        directoryService.doSourceMessage(message);
     }
 }
