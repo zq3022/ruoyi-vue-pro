@@ -74,6 +74,8 @@
         <jimureport.version>1.6.1</jimureport.version>
         <xercesImpl.version>2.12.2</xercesImpl.version>
         <weixin-java.version>4.5.0</weixin-java.version>
+        <commons-imaging.version>1.0-alpha3</commons-imaging.version>
+        <metadata-extractor.version>2.19.0</metadata-extractor.version>
     </properties>
 
     <dependencyManagement>
@@ -651,6 +653,19 @@
                 <artifactId>spring-boot-starter-websocket</artifactId>
                 <version>${spring.boot.version}</version>
             </dependency>
+
+            <!-- 图片 -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-imaging</artifactId>
+                <version>${commons-imaging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.drewnoakes</groupId>
+                <artifactId>metadata-extractor</artifactId>
+                <version>${metadata-extractor.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

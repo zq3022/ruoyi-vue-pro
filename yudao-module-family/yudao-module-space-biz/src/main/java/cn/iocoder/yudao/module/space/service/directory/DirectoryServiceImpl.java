@@ -1,15 +1,18 @@
 package cn.iocoder.yudao.module.space.service.directory;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.space.controller.admin.directory.vo.DirectoryPageReqVO;
 import cn.iocoder.yudao.module.space.controller.admin.directory.vo.DirectorySaveReqVO;
 import cn.iocoder.yudao.module.space.dal.dataobject.directory.DirectoryDO;
+import cn.iocoder.yudao.module.space.dal.dataobject.source.SourceDO;
 import cn.iocoder.yudao.module.space.dal.mysql.directory.DirectoryMapper;
 import cn.iocoder.yudao.module.space.enums.MessageTypeEnum;
 import cn.iocoder.yudao.module.space.mq.message.source.SourceMessage;
 import cn.iocoder.yudao.module.space.mq.producer.DirectoryProducer;
+import cn.iocoder.yudao.module.space.service.source.SourceService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -43,6 +46,8 @@ public class DirectoryServiceImpl implements DirectoryService {
 
     @Resource
     private DirectoryMapper directoryMapper;
+    @Resource
+    private SourceService sourceService;
     @Resource
     private DirectoryProducer directoryProducer;
 
@@ -88,8 +93,19 @@ public class DirectoryServiceImpl implements DirectoryService {
         return directoryMapper.selectPage(pageReqVO);
     }
 
+    @Override
+    public String getFullPath(Long directoryId) {
+        DirectoryDO directory = getDirectory(directoryId);
+
+        if(directory == null){
+            return null;
+        }
+        SourceDO sourceDO = sourceService.getSource(directory.getSourceId());
+        return StrUtil.concat(true, sourceDO.getPath(), File.separator, directoryMapper.getFullPath(directory));
+    }
+
     /**
-     * 处理目录源的消息
+     * 处理目录源的消
      *
      * @param message 源变更 消息
      */

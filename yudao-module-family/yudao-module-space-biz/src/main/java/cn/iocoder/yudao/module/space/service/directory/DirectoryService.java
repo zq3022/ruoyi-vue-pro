@@ -61,4 +61,10 @@ public interface DirectoryService {
      */
     void doSourceMessage(SourceMessage message) throws IOException;
 
+    /**
+     * 获取目录的全路径
+     *
+     * @param directoryId 目录id
+     */
+    String getFullPath(Long directoryId);
 }

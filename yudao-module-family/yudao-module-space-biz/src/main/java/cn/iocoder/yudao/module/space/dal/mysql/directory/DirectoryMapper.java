@@ -9,7 +9,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.io.File;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 目录 Mapper
@@ -68,5 +70,15 @@ public interface DirectoryMapper extends BaseMapperX<DirectoryDO> {
     default List<DirectoryDO> selectBySource(Long sourceId){
         return selectList(new LambdaUpdateWrapper<DirectoryDO>()
                 .eq(DirectoryDO::getSourceId, sourceId));
+    }
+
+    default String getFullPath(DirectoryDO directory){
+        List<DirectoryDO> list = selectList(new LambdaQueryWrapperX<DirectoryDO>()
+                .eq(DirectoryDO::getSourceId, directory.getSourceId())
+                .lt(DirectoryDO::getLft, directory.getLft())
+                .gt(DirectoryDO::getRgt, directory.getRgt())
+                .orderByAsc(DirectoryDO::getLft)
+        );
+        return list.stream().map(DirectoryDO::getName).collect(Collectors.joining(File.separator));
     }
 }
