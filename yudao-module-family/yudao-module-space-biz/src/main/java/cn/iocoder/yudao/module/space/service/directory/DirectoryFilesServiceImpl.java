@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.space.service.directory;
 
 import cn.iocoder.yudao.module.space.dal.redis.no.MessageNoRedisDAO;
+import cn.iocoder.yudao.module.space.enums.MessageTypeEnum;
 import cn.iocoder.yudao.module.space.mq.message.directory.DirectoryMessage;
 import com.alibaba.druid.util.StringUtils;
 import com.drew.imaging.ImageMetadataReader;
@@ -47,18 +48,16 @@ public class DirectoryFilesServiceImpl implements DirectoryFilesService {
 
         // TODO
         log.info("处理目录的消息,{}", message.getDirectoryId());
-        scanFilesInDirectory(message.getDirectoryId());
-//        switch (MessageTypeEnum.valueOf(message.getMessageType())) {
-//            case ADD: // 目录新增
-//                createdCol = createTree(message);
-//                break;
-//            case DELETE:
-//                // 删除目录
+
+        switch (MessageTypeEnum.valueOf(message.getMessageType())) {
+            case ADD: // 目录新增
+                scanFilesInDirectory(message.getDirectoryId());
+                break;
+            case DELETE:
+                // 删除目录
 //                deletedCol = deleteTree(message);
-//                break;
-//            case UPDATE:
-//                break;
-//        }
+                break;
+        }
 
     }
 

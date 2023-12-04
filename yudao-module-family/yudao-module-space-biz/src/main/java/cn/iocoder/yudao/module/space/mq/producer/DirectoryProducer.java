@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.space.mq.producer;
 
+import cn.iocoder.yudao.framework.tenant.core.context.TenantContextHolder;
 import cn.iocoder.yudao.module.space.dal.dataobject.directory.DirectoryDO;
 import cn.iocoder.yudao.module.space.dal.redis.no.MessageNoRedisDAO;
 import cn.iocoder.yudao.module.space.enums.MessageTypeEnum;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static cn.iocoder.yudao.framework.web.core.util.WebFrameworkUtils.HEADER_TENANT_ID;
 
 @Component
 @Slf4j
@@ -55,7 +58,8 @@ public class DirectoryProducer {
                             .setMessageType(messageType)
                             .setNo(messageNoRedisDAO.generateDirectoryMessageNo())
                             .setDirectoryId(d.getId());
-                    return MessageBuilder.withPayload(payload).build();
+                    Long tenantId = TenantContextHolder.getTenantId();
+                    return MessageBuilder.withPayload(payload).setHeader(HEADER_TENANT_ID, tenantId.toString()).build();
                 })
                 .collect(Collectors.toList());
         rocketMQTemplate.syncSendOrderly(DirectoryMessage.TOPIC, messages, sourceId);
