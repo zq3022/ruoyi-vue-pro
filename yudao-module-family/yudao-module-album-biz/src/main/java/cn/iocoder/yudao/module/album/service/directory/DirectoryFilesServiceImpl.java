@@ -1,6 +1,7 @@
-package cn.iocoder.yudao.module.space.service.directory;
+package cn.iocoder.yudao.module.album.service.directory;
 
-import cn.iocoder.yudao.module.space.dal.redis.no.MessageNoRedisDAO;
+import cn.iocoder.yudao.module.album.dal.redis.directory.DirectoryRedisDAO;
+import cn.iocoder.yudao.module.space.api.directory.DirectoryApi;
 import cn.iocoder.yudao.module.space.enums.MessageTypeEnum;
 import cn.iocoder.yudao.module.space.mq.message.directory.DirectoryMessage;
 import com.alibaba.druid.util.StringUtils;
@@ -27,20 +28,20 @@ import java.io.File;
 public class DirectoryFilesServiceImpl implements DirectoryFilesService {
 
     @Resource
-    private DirectoryService directoryService;
+    private DirectoryApi directoryApi;
 
     @Resource
-    private MessageNoRedisDAO messageNoRedisDAO;
+    private DirectoryRedisDAO directoryRedisDAO;
 
     /**
-     * 处理源变更导致的目录变更，需要重新扫码目录下的文件
+     * 处理源变更导致的相册目录变更，需要重新扫码目录下的照片
      *
      * @param message 目录变更 消息
      */
     @Override
-    public void doDirectoryMessage(DirectoryMessage message) {
-        String messageTempNo = messageNoRedisDAO.generateDirectoryMessageNo();
-        messageNoRedisDAO.setDirectoryScanning(message.getDirectoryId(), messageTempNo);
+    public void doAlbumDirectoryMessage(DirectoryMessage message) {
+        String messageTempNo = directoryRedisDAO.generateDirectoryScanningNo();
+        directoryRedisDAO.setDirectoryScanning(message.getDirectoryId(), messageTempNo);
 
         if (!isCurrentMessageScanningDirectory(message.getDirectoryId(), messageTempNo)) {
             return ;
@@ -58,19 +59,18 @@ public class DirectoryFilesServiceImpl implements DirectoryFilesService {
 //                deletedCol = deleteTree(message);
                 break;
         }
-
     }
 
     private boolean isCurrentMessageScanningDirectory(Long directoryId, String messageTempNo) {
-        String currentDirectoryScanning = messageNoRedisDAO.getDirectoryScanning(directoryId);
+        String currentDirectoryScanning = directoryRedisDAO.getDirectoryScanning(directoryId);
         return StringUtils.equals(currentDirectoryScanning, messageTempNo);
     }
 
     @SneakyThrows
     public void scanFilesInDirectory(Long directoryId) {
         // 1. 获得目录
-        File file = new File(directoryService.getFullPath(directoryId));
-        if (!file.exists() && !file.isDirectory()) {
+        File file = new File(directoryApi.getFullPath(directoryId));
+        if (!file.exists() || !file.isDirectory()) {
             return;
         }
         for (File listFile : file.listFiles()) {

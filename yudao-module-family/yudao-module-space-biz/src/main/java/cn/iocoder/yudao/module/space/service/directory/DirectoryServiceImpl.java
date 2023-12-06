@@ -130,11 +130,11 @@ public class DirectoryServiceImpl implements DirectoryService {
 
         // 发送文件夹变更的消息
         if (!createdCol.isEmpty()) {
-            directoryProducer.sendCreatedMessages(createdCol, String.valueOf(message.getSourceId()));
+            directoryProducer.sendCreatedMessages(createdCol, message.getSourceId());
         }
 
         if (!deletedCol.isEmpty()) {
-            directoryProducer.sendDeletedMessages(deletedCol, String.valueOf(message.getSourceId()));
+            directoryProducer.sendDeletedMessages(deletedCol, message.getSourceId());
         }
     }
 

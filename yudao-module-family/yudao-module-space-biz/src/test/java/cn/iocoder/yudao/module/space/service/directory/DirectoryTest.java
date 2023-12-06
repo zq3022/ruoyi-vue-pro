@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.space.service.directory;
 
 import cn.iocoder.yudao.framework.test.core.ut.BaseMockitoUnitTest;
+import com.alibaba.druid.util.StringUtils;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
@@ -8,6 +9,7 @@ import com.drew.metadata.Tag;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -28,17 +30,13 @@ public class DirectoryTest extends BaseMockitoUnitTest {
         String filePath = "/Users/qzh/Downloads/PhotoSwipe-master";
         Files.walkFileTree(Paths.get(filePath), new SimpleFileVisitor<Path>(){
             @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-                    throws IOException
-            {
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
                 System.out.println(dir.toString());
                 return FileVisitResult.CONTINUE;
             }
 
             @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc)
-                    throws IOException
-            {
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
                 System.out.println(dir.toString());
                 if (exc != null)
                     throw exc;
@@ -70,6 +68,62 @@ public class DirectoryTest extends BaseMockitoUnitTest {
                 log.info("tagType:{}, tagName:{}, description: {}",tag.getTagType(), tag.getTagName(), tag.getDescription());
             }
         }
+    }
+
+    @SneakyThrows
+    @Test
+    public void testImageMetadata() {
+        File file = new File("/Users/qzh/Documents/图片/WechatIMG2431.jpg");
+//        File file = new File("/Users/qzh/Documents/图片/头像/0.jpg");
+        Metadata metadata = ImageMetadataReader.readMetadata(file);
+        log.info("listFile: {}", file.getName());
+        for (Directory directory : metadata.getDirectories()) {
+            for (Tag tag : directory.getTags()) {
+                String tagName = tag.getTagName();
+                String tagDesc = tag.getDescription();
+                log.info("tagName: {}, tagDesc: {}", tagName, tagDesc);
+                if (StringUtils.equals(tagName, "Image Description")) {
+                    // 图片描述
+                    log.info("图片描述: {}", tagDesc);
+                }
+            }
+        }
+    }
+
+    @SneakyThrows
+    @Test
+    public void testImageMetadataByImageIo() {
+//        File file = new File("/Users/qzh/Documents/图片/WechatIMG2431.jpg");
+        File file = new File("/Users/qzh/Desktop/WechatIMG694.jpg");
+
+//        File file = new File("/Users/qzh/Documents/图片/头像/0.jpg");
+//        Detected MIME Type
+
+//        Metadata metadata = ImageMetadataReader.readMetadata(file);
+//        Collection<FileTypeDirectory> directoriesOfType = metadata.getDirectoriesOfType(FileTypeDirectory.class);
+        Metadata metadata = ImageMetadataReader.readMetadata(file);
+//        JpegImageMetadataReader JPEGMetadataReader = new JpegImageMetadata();
+
+//        JpegImageMetadataReader.readMetadata(file);
+
+
+
+        log.info("listFile: {}", file.getName());
+        for (Directory directory : metadata.getDirectories()) {
+            log.info("--------{}", directory.getName());
+            for (Tag tag : directory.getTags()) {
+                String tagName = tag.getTagName();
+                String tagDesc = tag.getDescription();
+                log.info("tagName: {}, tagDesc: {}", tagName, tagDesc);
+                if (StringUtils.equals(tagName, "Image Description")) {
+                    // 图片描述
+                    log.info("图片描述: {}", tagDesc);
+                }
+            }
+        }
+
+
+
     }
 
 }

@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class DirectoryMessage {
-    public static final String TOPIC = "DIRECTORY_MESSAGE";
+    public static final String TOPIC_PREFIX = "DIRECTORY_MESSAGE_";
     public static final String MESSAGE_NO_PREFIX = "SD";  // space directory
 
     /**
