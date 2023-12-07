@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.space.service.directory;
 
+import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.framework.test.core.ut.BaseMockitoUnitTest;
 import com.alibaba.druid.util.StringUtils;
 import com.drew.imaging.ImageMetadataReader;
@@ -114,11 +115,13 @@ public class DirectoryTest extends BaseMockitoUnitTest {
             for (Tag tag : directory.getTags()) {
                 String tagName = tag.getTagName();
                 String tagDesc = tag.getDescription();
-                log.info("tagName: {}, tagDesc: {}", tagName, tagDesc);
+                log.info("tagName: {}[{}], tagDesc: {}", tagName, StrUtil.toCamelCase(tagName,' '), tagDesc);
                 if (StringUtils.equals(tagName, "Image Description")) {
                     // 图片描述
                     log.info("图片描述: {}", tagDesc);
                 }
+
+
             }
         }
 

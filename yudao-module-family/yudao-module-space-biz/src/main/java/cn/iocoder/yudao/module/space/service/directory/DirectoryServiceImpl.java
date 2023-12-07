@@ -101,6 +101,9 @@ public class DirectoryServiceImpl implements DirectoryService {
             return null;
         }
         SourceDO sourceDO = sourceService.getSource(directory.getSourceId());
+        if(sourceDO == null){
+            return null;
+        }
         return StrUtil.concat(true, sourceDO.getPath(), File.separator, directoryMapper.getFullPath(directory));
     }
 

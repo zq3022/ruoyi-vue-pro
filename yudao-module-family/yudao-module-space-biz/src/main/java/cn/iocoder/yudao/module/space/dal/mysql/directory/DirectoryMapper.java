@@ -75,8 +75,9 @@ public interface DirectoryMapper extends BaseMapperX<DirectoryDO> {
     default String getFullPath(DirectoryDO directory){
         List<DirectoryDO> list = selectList(new LambdaQueryWrapperX<DirectoryDO>()
                 .eq(DirectoryDO::getSourceId, directory.getSourceId())
-                .lt(DirectoryDO::getLft, directory.getLft())
-                .gt(DirectoryDO::getRgt, directory.getRgt())
+                .le(DirectoryDO::getLft, directory.getLft())
+                .ge(DirectoryDO::getRgt, directory.getRgt())
+                .ne(DirectoryDO::getLft, 1)
                 .orderByAsc(DirectoryDO::getLft)
         );
         return list.stream().map(DirectoryDO::getName).collect(Collectors.joining(File.separator));

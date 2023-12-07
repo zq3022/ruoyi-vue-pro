@@ -1,6 +1,6 @@
 package cn.iocoder.yudao.module.album.mq.consumer;
 
-import cn.iocoder.yudao.module.album.service.directory.DirectoryFilesService;
+import cn.iocoder.yudao.module.album.service.photo.PhotoService;
 import cn.iocoder.yudao.module.space.api.directory.DirectoryConsumerLockRedisApi;
 import cn.iocoder.yudao.module.space.mq.message.directory.DirectoryMessage;
 import lombok.SneakyThrows;
@@ -24,7 +24,7 @@ import javax.annotation.Resource;
 @Slf4j
 public class AlbumDirectoryConsumer implements RocketMQListener<DirectoryMessage> {
     @Resource
-    private DirectoryFilesService directoryFilesService;
+    private PhotoService photoService;
 
     @Resource
     private DirectoryConsumerLockRedisApi directoryConsumerLockRedisApi;
@@ -36,7 +36,7 @@ public class AlbumDirectoryConsumer implements RocketMQListener<DirectoryMessage
         log.info("[onMessage][目录,{}]", message);
         directoryConsumerLockRedisApi.lock(message.getNo(), 20000L, () -> {
         try {
-            directoryFilesService.doAlbumDirectoryMessage(message);
+            photoService.doAlbumDirectoryMessage(message);
         } catch (Exception e) {
             log.error("[onMessage][执行目录消息失败，message({}) 异常({})]", message, e);
         }
