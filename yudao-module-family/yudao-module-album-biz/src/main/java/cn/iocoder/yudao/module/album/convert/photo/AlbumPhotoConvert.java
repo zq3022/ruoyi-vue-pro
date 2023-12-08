@@ -29,7 +29,17 @@ public interface AlbumPhotoConvert {
 
         for (Directory directory : metadata.getDirectories()) {
             for (Tag tag : directory.getTags()) {
-                tagMap.put(StrUtil.toCamelCase(tag.getTagName(),' '), tag.getDescription());
+                if (StrUtil.equals(tag.getTagName(), "Date/Time Original")) {
+                    tagMap.put("datetime_original", tag.getDescription());
+                } else if (StrUtil.equals(tag.getTagName(), "Date/Time Digitized")) {
+                    tagMap.put("datetime_digitized", tag.getDescription());
+                } else if (StrUtil.equals(tag.getTagName(), "F-Number")) {
+                    tagMap.put("fnumber", tag.getDescription());
+                } else if (StrUtil.equals(tag.getTagName(), "ISO Speed Ratings")) {
+                    tagMap.put("iso_speed_ratings", tag.getDescription());
+                }else {
+                    tagMap.put(StrUtil.toCamelCase(tag.getTagName(),' '), tag.getDescription());
+                }
             }
         }
 

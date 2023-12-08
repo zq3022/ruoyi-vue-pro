@@ -1,6 +1,9 @@
 package cn.iocoder.yudao.module.album.dal.dataobject.photo;
 
 import lombok.*;
+import java.util.*;
+import java.time.LocalDateTime;
+import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.*;
 import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 
@@ -29,33 +32,9 @@ public class PhotoDO extends BaseDO {
      */
     private Long directoryId;
     /**
-     * 文件名称
-     */
-    private String fileName;
-    /**
-     * 文件大小字节数
-     */
-    private String fileSize;
-    /**
-     * 图片宽度，像素
-     */
-    private String imageWidth;
-    /**
-     * 图片高度，像素
-     */
-    private String imageHeight;
-    /**
-     * 文件修改时间
-     */
-    private String fileModifiedDate;
-    /**
      * 文件类型
      */
     private String detectedFileTypeName;
-    /**
-     * 文件类型长名
-     */
-    private String detectedFileTypeLongName;
     /**
      * MIME类型
      */
@@ -77,17 +56,9 @@ public class PhotoDO extends BaseDO {
      */
     private String model;
     /**
-     * 色彩空间
-     */
-    private String colorSpace;
-    /**
      * 作者
      */
     private String artist;
-    /**
-     * 方向, 1'upper left', 3'lower right', 6'upper right', 8'lower left', 9'undefined'
-     */
-    private String orientation;
     /**
      * 水平方向分辨率
      */
@@ -96,10 +67,6 @@ public class PhotoDO extends BaseDO {
      * 垂直方向分辨率
      */
     private String yResolution;
-    /**
-     * 分辨率单位
-     */
-    private String resolutionUnit;
     /**
      * 软件
      */
@@ -137,37 +104,9 @@ public class PhotoDO extends BaseDO {
      */
     private String exposureProgram;
     /**
-     * Exif版本
-     */
-    private String exifVersion;
-    /**
-     * 拍摄时间
-     */
-    private String datetimeOriginal;
-    /**
-     * 数字化时间
-     */
-    private String datetimeDigitized;
-    /**
-     * 测光模式（平均测光、中央重点测光、点测光）
-     */
-    private String meteringMode;
-    /**
      * 闪光灯
      */
     private String flash;
-    /**
-     * 镜头焦距
-     */
-    private String focalLength;
-    /**
-     * 图像宽度
-     */
-    private String exifImageWidth;
-    /**
-     * 图像高度
-     */
-    private String exifImageLength;
     /**
      * 镜头厂商
      */
@@ -184,5 +123,137 @@ public class PhotoDO extends BaseDO {
      * 用户注释
      */
     private String userComment;
+    /**
+     * 文件名称
+     */
+    private String fileName;
+    /**
+     * 文件大小字节数
+     */
+    private String fileSize;
+    /**
+     * 图片宽度，像素
+     */
+    private String imageWidth;
+    /**
+     * 图片高度，像素
+     */
+    private String imageHeight;
+    /**
+     * 文件修改时间
+     */
+    private String fileModifiedDate;
+    /**
+     * 文件来源
+     */
+    private String fileSource;
+    /**
+     * 压缩类型
+     */
+    private String compressionType;
+    /**
+     * 数据精度
+     */
+    private String dataPrecision;
+    /**
+     * 压缩比
+     */
+    private String compressedBitsPerPixel;
+    /**
+     * 分辨率单位
+     */
+    private String resolutionUnits;
+    /**
+     * 方向
+     */
+    private String orientation;
+    /**
+     * 曝光补偿
+     */
+    private String exposureBiasValue;
+    /**
+     * 曝光模式
+     */
+    private String exposureMode;
+    /**
+     * 色彩
+     */
+    private String colorSpace;
+    /**
+     * 饱和度
+     */
+    private String saturation;
+    /**
+     * 亮度
+     */
+    private String brightnessValue;
+    /**
+     * 白平衡
+     */
+    private String whiteBalance;
+    /**
+     * 白平衡模式
+     */
+    private String whiteBalanceMode;
+    /**
+     * 光圈
+     */
+    private String apertureValue;
+    /**
+     * 最大光圈值
+     */
+    private String maxApertureValue;
+    /**
+     * 感光度
+     */
+    private String isoSpeedRatings;
+    /**
+     * 对比度
+     */
+    private String contrast;
+    /**
+     * 锯齿
+     */
+    private String sharpness;
+    /**
+     * 变焦
+     */
+    private String digitalZoomRatio;
+    /**
+     * 快门
+     */
+    private String shutterSpeedValue;
+    /**
+     * 测光模式
+     */
+    private String meteringMode;
+    /**
+     * 焦距
+     */
+    private String focalLength;
+    /**
+     * 拍摄距离范围
+     */
+    private String subjectDistanceRange;
+    /**
+     * 场景捕捉类型
+     */
+    private String sceneCaptureType;
+    /**
+     * 拍摄时间
+     */
+    private String datetimeOriginal;
+    /**
+     * 数字化时间
+     */
+    private String datetimeDigitized;
+    /**
+     * 场景类型
+     */
+    private String sceneType;
+    /**
+     * 感测方式
+     */
+    private String sensingMethod;
 
 }

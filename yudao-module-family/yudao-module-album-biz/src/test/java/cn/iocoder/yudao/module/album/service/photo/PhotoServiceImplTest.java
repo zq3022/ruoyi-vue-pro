@@ -111,24 +111,15 @@ public class PhotoServiceImplTest extends BaseDbUnitTest {
        // mock 数据
        PhotoDO dbPhoto = randomPojo(PhotoDO.class, o -> { // 等会查询到
            o.setDirectoryId(null);
-           o.setFileName(null);
-           o.setFileSize(null);
-           o.setImageWidth(null);
-           o.setImageHeight(null);
-           o.setFileModifiedDate(null);
            o.setDetectedFileTypeName(null);
-           o.setDetectedFileTypeLongName(null);
            o.setDetectedMimeType(null);
            o.setExpectedFileNameExtension(null);
            o.setImageDescription(null);
            o.setMake(null);
            o.setModel(null);
-           o.setColorSpace(null);
            o.setArtist(null);
-           o.setOrientation(null);
            o.setXResolution(null);
            o.setYResolution(null);
-           o.setResolutionUnit(null);
            o.setSoftware(null);
            o.setWhitePoint(null);
            o.setPrimaryChromaticities(null);
@@ -138,37 +129,51 @@ public class PhotoServiceImplTest extends BaseDbUnitTest {
            o.setExposureTime(null);
            o.setFnumber(null);
            o.setExposureProgram(null);
-           o.setExifVersion(null);
-           o.setDatetimeOriginal(null);
-           o.setDatetimeDigitized(null);
-           o.setMeteringMode(null);
            o.setFlash(null);
-           o.setFocalLength(null);
-           o.setExifImageWidth(null);
-           o.setExifImageLength(null);
            o.setLensMake(null);
            o.setLensModel(null);
            o.setMakernote(null);
            o.setUserComment(null);
            o.setCreateTime(null);
+           o.setFileName(null);
+           o.setFileSize(null);
+           o.setImageWidth(null);
+           o.setImageHeight(null);
+           o.setFileModifiedDate(null);
+           o.setFileSource(null);
+           o.setCompressionType(null);
+           o.setDataPrecision(null);
+           o.setCompressedBitsPerPixel(null);
+           o.setResolutionUnits(null);
+           o.setOrientation(null);
+           o.setExposureBiasValue(null);
+           o.setExposureMode(null);
+           o.setColorSpace(null);
+           o.setSaturation(null);
+           o.setBrightnessValue(null);
+           o.setWhiteBalance(null);
+           o.setWhiteBalanceMode(null);
+           o.setApertureValue(null);
+           o.setMaxApertureValue(null);
+           o.setIsoSpeedRatings(null);
+           o.setContrast(null);
+           o.setSharpness(null);
+           o.setDigitalZoomRatio(null);
+           o.setShutterSpeedValue(null);
+           o.setMeteringMode(null);
+           o.setFocalLength(null);
+           o.setSubjectDistanceRange(null);
+           o.setSceneCaptureType(null);
+           o.setDatetimeOriginal(null);
+           o.setDatetimeDigitized(null);
+           o.setSceneType(null);
+           o.setSensingMethod(null);
        });
        photoMapper.insert(dbPhoto);
        // 测试 directoryId 不匹配
        photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setDirectoryId(null)));
-       // 测试 fileName 不匹配
-       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setFileName(null)));
-       // 测试 fileSize 不匹配
-       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setFileSize(null)));
-       // 测试 imageWidth 不匹配
-       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setImageWidth(null)));
-       // 测试 imageHeight 不匹配
-       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setImageHeight(null)));
-       // 测试 fileModifiedDate 不匹配
-       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setFileModifiedDate(null)));
        // 测试 detectedFileTypeName 不匹配
        photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setDetectedFileTypeName(null)));
-       // 测试 detectedFileTypeLongName 不匹配
-       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setDetectedFileTypeLongName(null)));
        // 测试 detectedMimeType 不匹配
        photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setDetectedMimeType(null)));
        // 测试 expectedFileNameExtension 不匹配
@@ -179,18 +184,12 @@ public class PhotoServiceImplTest extends BaseDbUnitTest {
        photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setMake(null)));
        // 测试 model 不匹配
        photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setModel(null)));
-       // 测试 colorSpace 不匹配
-       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setColorSpace(null)));
        // 测试 artist 不匹配
        photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setArtist(null)));
-       // 测试 orientation 不匹配
-       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setOrientation(null)));
        // 测试 xResolution 不匹配
        photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setXResolution(null)));
        // 测试 yResolution 不匹配
        photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setYResolution(null)));
-       // 测试 resolutionUnit 不匹配
-       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setResolutionUnit(null)));
        // 测试 software 不匹配
        photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setSoftware(null)));
        // 测试 whitePoint 不匹配
@@ -209,22 +208,8 @@ public class PhotoServiceImplTest extends BaseDbUnitTest {
        photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setFnumber(null)));
        // 测试 exposureProgram 不匹配
        photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setExposureProgram(null)));
-       // 测试 exifVersion 不匹配
-       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setExifVersion(null)));
-       // 测试 datetimeOriginal 不匹配
-       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setDatetimeOriginal(null)));
-       // 测试 datetimeDigitized 不匹配
-       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setDatetimeDigitized(null)));
-       // 测试 meteringMode 不匹配
-       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setMeteringMode(null)));
        // 测试 flash 不匹配
        photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setFlash(null)));
-       // 测试 focalLength 不匹配
-       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setFocalLength(null)));
-       // 测试 exifImageWidth 不匹配
-       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setExifImageWidth(null)));
-       // 测试 exifImageLength 不匹配
-       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setExifImageLength(null)));
        // 测试 lensMake 不匹配
        photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setLensMake(null)));
        // 测试 lensModel 不匹配
@@ -235,27 +220,84 @@ public class PhotoServiceImplTest extends BaseDbUnitTest {
        photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setUserComment(null)));
        // 测试 createTime 不匹配
        photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setCreateTime(null)));
+       // 测试 fileName 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setFileName(null)));
+       // 测试 fileSize 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setFileSize(null)));
+       // 测试 imageWidth 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setImageWidth(null)));
+       // 测试 imageHeight 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setImageHeight(null)));
+       // 测试 fileModifiedDate 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setFileModifiedDate(null)));
+       // 测试 fileSource 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setFileSource(null)));
+       // 测试 compressionType 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setCompressionType(null)));
+       // 测试 dataPrecision 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setDataPrecision(null)));
+       // 测试 compressedBitsPerPixel 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setCompressedBitsPerPixel(null)));
+       // 测试 resolutionUnits 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setResolutionUnits(null)));
+       // 测试 orientation 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setOrientation(null)));
+       // 测试 exposureBiasValue 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setExposureBiasValue(null)));
+       // 测试 exposureMode 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setExposureMode(null)));
+       // 测试 colorSpace 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setColorSpace(null)));
+       // 测试 saturation 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setSaturation(null)));
+       // 测试 brightnessValue 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setBrightnessValue(null)));
+       // 测试 whiteBalance 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setWhiteBalance(null)));
+       // 测试 whiteBalanceMode 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setWhiteBalanceMode(null)));
+       // 测试 apertureValue 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setApertureValue(null)));
+       // 测试 maxApertureValue 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setMaxApertureValue(null)));
+       // 测试 isoSpeedRatings 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setIsoSpeedRatings(null)));
+       // 测试 contrast 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setContrast(null)));
+       // 测试 sharpness 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setSharpness(null)));
+       // 测试 digitalZoomRatio 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setDigitalZoomRatio(null)));
+       // 测试 shutterSpeedValue 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setShutterSpeedValue(null)));
+       // 测试 meteringMode 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setMeteringMode(null)));
+       // 测试 focalLength 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setFocalLength(null)));
+       // 测试 subjectDistanceRange 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setSubjectDistanceRange(null)));
+       // 测试 sceneCaptureType 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setSceneCaptureType(null)));
+       // 测试 datetimeOriginal 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setDatetimeOriginal(null)));
+       // 测试 datetimeDigitized 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setDatetimeDigitized(null)));
+       // 测试 sceneType 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setSceneType(null)));
+       // 测试 sensingMethod 不匹配
+       photoMapper.insert(cloneIgnoreId(dbPhoto, o -> o.setSensingMethod(null)));
        // 准备参数
        PhotoPageReqVO reqVO = new PhotoPageReqVO();
        reqVO.setDirectoryId(null);
-       reqVO.setFileName(null);
-       reqVO.setFileSize(null);
-       reqVO.setImageWidth(null);
-       reqVO.setImageHeight(null);
-       reqVO.setFileModifiedDate(buildBetweenTime(2023, 2, 1, 2023, 2, 28));
        reqVO.setDetectedFileTypeName(null);
-       reqVO.setDetectedFileTypeLongName(null);
        reqVO.setDetectedMimeType(null);
        reqVO.setExpectedFileNameExtension(null);
        reqVO.setImageDescription(null);
        reqVO.setMake(null);
        reqVO.setModel(null);
-       reqVO.setColorSpace(null);
        reqVO.setArtist(null);
-       reqVO.setOrientation(null);
        reqVO.setXResolution(null);
        reqVO.setYResolution(null);
-       reqVO.setResolutionUnit(null);
        reqVO.setSoftware(null);
        reqVO.setWhitePoint(null);
        reqVO.setPrimaryChromaticities(null);
@@ -265,19 +307,45 @@ public class PhotoServiceImplTest extends BaseDbUnitTest {
 //       reqVO.setExposureTime(buildBetweenTime(2023, 2, 1, 2023, 2, 28));
        reqVO.setFnumber(null);
        reqVO.setExposureProgram(null);
-       reqVO.setExifVersion(null);
-       reqVO.setDatetimeOriginal(null);
-       reqVO.setDatetimeDigitized(null);
-       reqVO.setMeteringMode(null);
        reqVO.setFlash(null);
-       reqVO.setFocalLength(null);
-       reqVO.setExifImageWidth(null);
-       reqVO.setExifImageLength(null);
        reqVO.setLensMake(null);
        reqVO.setLensModel(null);
        reqVO.setMakernote(null);
        reqVO.setUserComment(null);
        reqVO.setCreateTime(buildBetweenTime(2023, 2, 1, 2023, 2, 28));
+       reqVO.setFileName(null);
+       reqVO.setFileSize(null);
+       reqVO.setImageWidth(null);
+       reqVO.setImageHeight(null);
+//       reqVO.setFileModifiedDate(buildBetweenTime(2023, 2, 1, 2023, 2, 28));
+       reqVO.setFileSource(null);
+       reqVO.setCompressionType(null);
+       reqVO.setDataPrecision(null);
+       reqVO.setCompressedBitsPerPixel(null);
+       reqVO.setResolutionUnits(null);
+       reqVO.setOrientation(null);
+       reqVO.setExposureBiasValue(null);
+       reqVO.setExposureMode(null);
+       reqVO.setColorSpace(null);
+       reqVO.setSaturation(null);
+       reqVO.setBrightnessValue(null);
+       reqVO.setWhiteBalance(null);
+       reqVO.setWhiteBalanceMode(null);
+       reqVO.setApertureValue(null);
+       reqVO.setMaxApertureValue(null);
+       reqVO.setIsoSpeedRatings(null);
+       reqVO.setContrast(null);
+       reqVO.setSharpness(null);
+       reqVO.setDigitalZoomRatio(null);
+       reqVO.setShutterSpeedValue(null);
+       reqVO.setMeteringMode(null);
+       reqVO.setFocalLength(null);
+       reqVO.setSubjectDistanceRange(null);
+       reqVO.setSceneCaptureType(null);
+       reqVO.setDatetimeOriginal(null);
+       reqVO.setDatetimeDigitized(null);
+       reqVO.setSceneType(null);
+       reqVO.setSensingMethod(null);
 
        // 调用
        PageResult<PhotoDO> pageResult = photoService.getPhotoPage(reqVO);

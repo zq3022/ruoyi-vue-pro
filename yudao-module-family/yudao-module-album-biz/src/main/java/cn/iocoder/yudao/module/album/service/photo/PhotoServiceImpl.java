@@ -7,19 +7,12 @@ import cn.iocoder.yudao.module.space.enums.MessageTypeEnum;
 import cn.iocoder.yudao.module.space.mq.message.directory.DirectoryMessage;
 import com.alibaba.druid.util.StringUtils;
 import com.drew.imaging.ImageMetadataReader;
-import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
-import com.drew.metadata.MetadataReader;
-import com.drew.metadata.Tag;
-import com.drew.metadata.file.FileSystemDirectory;
-import com.drew.metadata.file.FileSystemMetadataReader;
-import com.drew.metadata.file.FileTypeDirectory;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +24,6 @@ import java.util.stream.Collectors;
 import cn.iocoder.yudao.module.album.controller.admin.photo.vo.*;
 import cn.iocoder.yudao.module.album.dal.dataobject.photo.PhotoDO;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 
 import cn.iocoder.yudao.module.album.dal.mysql.photo.PhotoMapper;
@@ -150,8 +142,6 @@ public class PhotoServiceImpl implements PhotoService {
                 new SimpleFileVisitor<Path>() {
                     @Override
                     public FileVisitResult visitFileFailed(Path path, IOException exc) {
-//                        Objects.requireNonNull(file);
-//                        Objects.requireNonNull(exc);
                         return FileVisitResult.CONTINUE;
                     }
 

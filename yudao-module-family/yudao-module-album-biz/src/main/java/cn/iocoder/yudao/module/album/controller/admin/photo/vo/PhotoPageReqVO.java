@@ -18,27 +18,8 @@ public class PhotoPageReqVO extends PageParam {
     @Schema(description = "目录编号", example = "4469")
     private Long directoryId;
 
-    @Schema(description = "文件名称", example = "王五")
-    private String fileName;
-
-    @Schema(description = "文件大小字节数")
-    private Long fileSize;
-
-    @Schema(description = "图片宽度，像素")
-    private Integer imageWidth;
-
-    @Schema(description = "图片高度，像素")
-    private Integer imageHeight;
-
-    @Schema(description = "文件修改时间")
-    @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-    private LocalDateTime[] fileModifiedDate;
-
     @Schema(description = "文件类型", example = "李四")
     private String detectedFileTypeName;
-
-    @Schema(description = "文件类型长名", example = "张三")
-    private String detectedFileTypeLongName;
 
     @Schema(description = "MIME类型", example = "2")
     private String detectedMimeType;
@@ -55,23 +36,14 @@ public class PhotoPageReqVO extends PageParam {
     @Schema(description = "型号")
     private String model;
 
-    @Schema(description = "色彩空间")
-    private String colorSpace;
-
     @Schema(description = "作者")
     private String artist;
-
-    @Schema(description = "方向, 1'upper left', 3'lower right', 6'upper right', 8'lower left', 9'undefined'")
-    private String orientation;
 
     @Schema(description = "水平方向分辨率")
     private String xResolution;
 
     @Schema(description = "垂直方向分辨率")
     private String yResolution;
-
-    @Schema(description = "分辨率单位")
-    private String resolutionUnit;
 
     @Schema(description = "软件")
     private String software;
@@ -101,29 +73,8 @@ public class PhotoPageReqVO extends PageParam {
     @Schema(description = "曝光程序")
     private String exposureProgram;
 
-    @Schema(description = "Exif版本")
-    private String exifVersion;
-
-    @Schema(description = "拍摄时间")
-    private LocalDateTime datetimeOriginal;
-
-    @Schema(description = "数字化时间")
-    private LocalDateTime datetimeDigitized;
-
-    @Schema(description = "测光模式（平均测光、中央重点测光、点测光）")
-    private String meteringMode;
-
     @Schema(description = "闪光灯")
     private String flash;
-
-    @Schema(description = "镜头焦距")
-    private String focalLength;
-
-    @Schema(description = "图像宽度")
-    private Integer exifImageWidth;
-
-    @Schema(description = "图像高度")
-    private Integer exifImageLength;
 
     @Schema(description = "镜头厂商")
     private String lensMake;
@@ -140,5 +91,105 @@ public class PhotoPageReqVO extends PageParam {
     @Schema(description = "创建时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime[] createTime;
+
+    @Schema(description = "文件名称", example = "李四")
+    private String fileName;
+
+    @Schema(description = "文件大小字节数")
+    private String fileSize;
+
+    @Schema(description = "图片宽度，像素")
+    private String imageWidth;
+
+    @Schema(description = "图片高度，像素")
+    private String imageHeight;
+
+    @Schema(description = "文件修改时间")
+    @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
+    private String[] fileModifiedDate;
+
+    @Schema(description = "文件来源")
+    private String fileSource;
+
+    @Schema(description = "压缩类型", example = "2")
+    private String compressionType;
+
+    @Schema(description = "数据精度")
+    private String dataPrecision;
+
+    @Schema(description = "压缩比")
+    private String compressedBitsPerPixel;
+
+    @Schema(description = "分辨率单位")
+    private String resolutionUnits;
+
+    @Schema(description = "方向")
+    private String orientation;
+
+    @Schema(description = "曝光补偿")
+    private String exposureBiasValue;
+
+    @Schema(description = "曝光模式")
+    private String exposureMode;
+
+    @Schema(description = "色彩")
+    private String colorSpace;
+
+    @Schema(description = "饱和度")
+    private String saturation;
+
+    @Schema(description = "亮度")
+    private String brightnessValue;
+
+    @Schema(description = "白平衡")
+    private String whiteBalance;
+
+    @Schema(description = "白平衡模式")
+    private String whiteBalanceMode;
+
+    @Schema(description = "光圈")
+    private String apertureValue;
+
+    @Schema(description = "最大光圈值")
+    private String maxApertureValue;
+
+    @Schema(description = "感光度")
+    private String isoSpeedRatings;
+
+    @Schema(description = "对比度")
+    private String contrast;
+
+    @Schema(description = "锯齿")
+    private String sharpness;
+
+    @Schema(description = "变焦")
+    private String digitalZoomRatio;
+
+    @Schema(description = "快门")
+    private String shutterSpeedValue;
+
+    @Schema(description = "测光模式")
+    private String meteringMode;
+
+    @Schema(description = "焦距")
+    private String focalLength;
+
+    @Schema(description = "拍摄距离范围")
+    private String subjectDistanceRange;
+
+    @Schema(description = "场景捕捉类型", example = "2")
+    private String sceneCaptureType;
+
+    @Schema(description = "拍摄时间")
+    private String datetimeOriginal;
+
+    @Schema(description = "数字化时间")
+    private String datetimeDigitized;
+
+    @Schema(description = "场景类型", example = "1")
+    private String sceneType;
+
+    @Schema(description = "感测方式")
+    private String sensingMethod;
 
 }

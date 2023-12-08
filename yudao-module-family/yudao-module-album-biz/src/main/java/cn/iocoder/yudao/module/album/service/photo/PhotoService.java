@@ -1,11 +1,9 @@
 package cn.iocoder.yudao.module.album.service.photo;
 
-import java.util.*;
 import javax.validation.*;
 import cn.iocoder.yudao.module.album.controller.admin.photo.vo.*;
 import cn.iocoder.yudao.module.album.dal.dataobject.photo.PhotoDO;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.module.space.mq.message.directory.DirectoryMessage;
 
 /**
