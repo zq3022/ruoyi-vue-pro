@@ -115,6 +115,7 @@ public class PhotoServiceImpl implements PhotoService {
                 break;
             case DELETE:
                 // 删除目录
+                deletePhotosInDirectory(message.getDirectoryId());
 //                deletedCol = deleteTree(message);
                 break;
         }
@@ -164,21 +165,6 @@ public class PhotoServiceImpl implements PhotoService {
 
                 });
         photoMapper.insertBatch(col);
-//        for (File listFile : file.listFiles()) {
-//            Metadata metadata = ImageMetadataReader.readMetadata(listFile);
-//            log.info("listFile: {}", listFile.getName());
-//            for (Directory directory : metadata.getDirectories()) {
-//                for (Tag tag : directory.getTags()) {
-//                    String tagName = tag.getTagName();
-//                    String tagDesc = tag.getDescription();
-//                    log.info("tagName: {}, tagDesc: {}", tagName, tagDesc);
-//                    if (StringUtils.equals(tagName, "Image Description")) {
-//                        // 图片描述
-//                        log.info("图片描述: {}", tagDesc);
-//                    }
-//                }
-//            }
-//        }
     }
 
     private PhotoDO processImage(Path path) {
@@ -198,4 +184,10 @@ public class PhotoServiceImpl implements PhotoService {
         }
         return null;
     }
+
+    private void deletePhotosInDirectory(Long directoryId) {
+        photoMapper.deleteByDirectoryId(directoryId);
+    }
+
+
 }

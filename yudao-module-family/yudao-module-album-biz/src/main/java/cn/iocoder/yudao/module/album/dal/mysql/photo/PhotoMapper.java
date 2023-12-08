@@ -6,6 +6,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.module.album.dal.dataobject.photo.PhotoDO;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.apache.ibatis.annotations.Mapper;
 import cn.iocoder.yudao.module.album.controller.admin.photo.vo.*;
 
@@ -80,4 +81,7 @@ public interface PhotoMapper extends BaseMapperX<PhotoDO> {
                 .orderByDesc(PhotoDO::getId));
     }
 
+    default void deleteByDirectoryId(Long directoryId){
+        delete(Wrappers.lambdaQuery(PhotoDO.class).eq(PhotoDO::getDirectoryId, directoryId));
+    }
 }
