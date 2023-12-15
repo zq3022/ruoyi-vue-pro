@@ -2,11 +2,8 @@ package cn.iocoder.yudao.module.space.mq.producer;
 
 import cn.iocoder.yudao.framework.tenant.core.context.TenantContextHolder;
 import cn.iocoder.yudao.module.space.dal.dataobject.directory.DirectoryDO;
-import cn.iocoder.yudao.module.space.dal.dataobject.source.SourceDO;
-import cn.iocoder.yudao.module.space.dal.redis.no.MessageNoRedisDAO;
 import cn.iocoder.yudao.module.space.enums.MessageTypeEnum;
 import cn.iocoder.yudao.module.space.mq.message.directory.DirectoryMessage;
-import cn.iocoder.yudao.module.space.service.source.SourceService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.messaging.Message;
@@ -26,20 +23,14 @@ public class DirectoryProducer {
     @Resource
     private RocketMQTemplate rocketMQTemplate; // 重点：注入 RocketMQTemplate 对象
 
-    @Resource
-    private MessageNoRedisDAO messageNoRedisDAO;
-
-    @Resource
-    private SourceService sourceService;
-
     /**
      * 发送 {@link DirectoryMessage} 消息
      *
      * @param createdCol 新增的目录集合
      * @param sourceId 源目录id
      */
-    public void sendCreatedMessages(List<DirectoryDO> createdCol, Long sourceId) {
-        sendDirectoryMessage(createdCol, sourceId, MessageTypeEnum.ADD.getValue());
+    public void sendCreatedMessages(List<DirectoryDO> createdCol, Long sourceId, Integer sourceType) {
+        sendDirectoryMessage(createdCol, sourceId, MessageTypeEnum.ADD.getValue(), sourceType);
     }
 
     /**
@@ -48,30 +39,25 @@ public class DirectoryProducer {
      * @param deletedCol 新增的目录集合
      * @param sourceId 源目录id
      */
-    public void sendDeletedMessages(List<DirectoryDO> deletedCol, Long sourceId) {
-        sendDirectoryMessage(deletedCol, sourceId, MessageTypeEnum.DELETE.getValue());
+    public void sendDeletedMessages(List<DirectoryDO> deletedCol, Long sourceId, Integer sourceType) {
+        sendDirectoryMessage(deletedCol, sourceId, MessageTypeEnum.DELETE.getValue(), sourceType);
     }
 
-    private void sendDirectoryMessage(List<DirectoryDO> deletedCol, Long sourceId, Integer messageType) {
+    private void sendDirectoryMessage(List<DirectoryDO> deletedCol, Long sourceId, Integer messageType, Integer sourceType) {
         if (deletedCol.isEmpty() || sourceId == null) {
             return;
         }
-        SourceDO source = sourceService.getSource(sourceId);
-        if (source == null) {
-            return;
-        }
-        String topic = DirectoryMessage.TOPIC_PREFIX + source.getType();
+        String topic = DirectoryMessage.TOPIC_PREFIX + sourceType;
         List<Message<DirectoryMessage>> messages = deletedCol.stream()
                 .map(d -> {
                     DirectoryMessage payload = new DirectoryMessage()
                             .setMessageType(messageType)
-                            .setNo(messageNoRedisDAO.generateDirectoryMessageNo())
                             .setDirectoryId(d.getId());
                     Long tenantId = TenantContextHolder.getTenantId();
                     return MessageBuilder.withPayload(payload).setHeader(HEADER_TENANT_ID, tenantId.toString()).build();
                 })
                 .collect(Collectors.toList());
+        // 重点：使用 RocketMQTemplate 同步发送目录的有序消息,有序消息按目录源id hash
         rocketMQTemplate.syncSendOrderly(topic, messages, String.valueOf(sourceId));
-//        rocketMQTemplate.syncSend(DirectoryMessage.TOPIC, messages); // 重点：使用 RocketMQTemplate 同步发送源目录新增的消息
     }
 }

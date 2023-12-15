@@ -4,9 +4,10 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.space.controller.admin.source.vo.SourcePageReqVO;
 import cn.iocoder.yudao.module.space.controller.admin.source.vo.SourceSaveReqVO;
-import cn.iocoder.yudao.module.space.convert.source.SpaceSourceConvert;
+import cn.iocoder.yudao.module.space.convert.source.SourceConvert;
 import cn.iocoder.yudao.module.space.dal.dataobject.source.SourceDO;
 import cn.iocoder.yudao.module.space.dal.mysql.source.SourceMapper;
+import cn.iocoder.yudao.module.space.mq.message.source.SourceMessage;
 import cn.iocoder.yudao.module.space.mq.producer.SourceProducer;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -42,8 +43,9 @@ public class SourceServiceImpl implements SourceService {
         SourceDO source = BeanUtils.toBean(createReqVO, SourceDO.class);
         sourceMapper.insert(source);
         // 发送`新增源`的mq消息
-        sourceChangeProducer.sendSourceAddMessage(SpaceSourceConvert.INSTANCE.convert(source)
-                .setSourceId(source.getId()));
+        sourceChangeProducer.sendSourceAddMessage(new SourceMessage()
+                .setSource(SourceConvert.INSTANCE.convert(source)
+                        .setId(source.getId())));
         // 返回
         return source.getId();
     }
@@ -57,9 +59,9 @@ public class SourceServiceImpl implements SourceService {
         SourceDO updateObj = BeanUtils.toBean(updateReqVO, SourceDO.class);
         sourceMapper.updateById(updateObj);
         // 发送`修改源`mq消息
-        sourceChangeProducer.sendSourceUpdateMessage(SpaceSourceConvert.INSTANCE.convert(updateObj)
-                .setSourceId(updateObj.getId())
-                .setOldPath(oldSource.getPath()));
+        sourceChangeProducer.sendSourceUpdateMessage(new SourceMessage()
+                .setSource(SourceConvert.INSTANCE.convert(sourceMapper.selectById(oldSource.getId())))
+                .setOldSource(SourceConvert.INSTANCE.convert(oldSource)));
     }
 
     @Override
@@ -69,8 +71,9 @@ public class SourceServiceImpl implements SourceService {
         // 删除
         sourceMapper.deleteById(id);
         // 发送`删除源`mq消息
-        sourceChangeProducer.sendSourceDeleteMessage(SpaceSourceConvert.INSTANCE.convert(oldSource)
-                .setSourceId(oldSource.getId()));
+        sourceChangeProducer.sendSourceDeleteMessage(new SourceMessage()
+                .setOldSource(SourceConvert.INSTANCE.convert(oldSource)
+                        .setId(oldSource.getId())));
     }
 
     private SourceDO validateSourceExists(Long id) {

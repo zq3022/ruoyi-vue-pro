@@ -2,7 +2,6 @@ package cn.iocoder.yudao.module.space.mq.message.directory;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
@@ -17,11 +16,11 @@ public class DirectoryMessage {
     @NotNull(message = "消息类型不能为空")
     private Integer messageType;
 
-    /**
-     * 目录消息序号
-     */
-    @NotBlank(message = "源消息序号不能为空")
-    private String no;
+//    /**
+//     * 目录消息序号
+//     */
+//    @NotBlank(message = "源消息序号不能为空")
+//    private String no;
 
     /**
      * 目录消息id

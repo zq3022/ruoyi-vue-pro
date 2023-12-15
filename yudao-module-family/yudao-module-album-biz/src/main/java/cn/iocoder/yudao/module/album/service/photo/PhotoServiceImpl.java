@@ -5,13 +5,14 @@ import cn.iocoder.yudao.module.album.dal.redis.directory.DirectoryRedisDAO;
 import cn.iocoder.yudao.module.space.api.directory.DirectoryApi;
 import cn.iocoder.yudao.module.space.enums.MessageTypeEnum;
 import cn.iocoder.yudao.module.space.mq.message.directory.DirectoryMessage;
-import com.alibaba.druid.util.StringUtils;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Metadata;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
+
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.io.File;
@@ -99,15 +100,13 @@ public class PhotoServiceImpl implements PhotoService {
      * @param message 目录变更 消息
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void doAlbumDirectoryMessage(DirectoryMessage message) {
-        String messageTempNo = directoryRedisDAO.generateDirectoryScanningNo();
-        directoryRedisDAO.setDirectoryScanning(message.getDirectoryId(), messageTempNo);
-
-        if (!isCurrentMessageScanningDirectory(message.getDirectoryId(), messageTempNo)) {
+        // 幂等性处理,防止同一个文件夹的同样操作的消息重复消费
+        if (directoryRedisDAO.hasDirectoryOperated(message.getDirectoryId(), String.valueOf(message.getMessageType()))) {
             return ;
         }
 
-        // TODO
         log.info("处理目录的消息,{}", message.getDirectoryId());
         switch (MessageTypeEnum.valueOf(message.getMessageType())) {
             case ADD: // 目录新增,扫描照片文件
@@ -116,18 +115,16 @@ public class PhotoServiceImpl implements PhotoService {
             case DELETE:
                 // 删除目录
                 deletePhotosInDirectory(message.getDirectoryId());
-//                deletedCol = deleteTree(message);
                 break;
         }
-    }
 
-    private boolean isCurrentMessageScanningDirectory(Long directoryId, String messageTempNo) {
-        String currentDirectoryScanning = directoryRedisDAO.getDirectoryScanning(directoryId);
-        return StringUtils.equals(currentDirectoryScanning, messageTempNo);
+        directoryRedisDAO.setDirectoryOperated(message.getDirectoryId(), message.getMessageType());
     }
 
     @SneakyThrows
     public void scanPhotosInDirectory(Long directoryId) {
+        long curr = System.currentTimeMillis();
+        // 获得目录的全路径
         String fullPath = directoryApi.getFullPath(directoryId);
         log.info("[scanPhotosInDirectory]{}[扫描目录({})的照片]", directoryId, fullPath);
         // 1. 获得目录
@@ -165,6 +162,7 @@ public class PhotoServiceImpl implements PhotoService {
 
                 });
         photoMapper.insertBatch(col);
+        log.info("[scanPhotosInDirectory end]{}", curr - System.currentTimeMillis());
     }
 
     private PhotoDO processImage(Path path) {

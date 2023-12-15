@@ -23,27 +23,12 @@ public class SourceMessage {
     @NotBlank(message = "源消息序号不能为空")
     private String no;
 
-    /**
-     * 目录源编号
-     */
-    @NotNull(message = "源Id不能为空")
-    private Long sourceId;
+    // 新建时,指新创建的source
+    // 修改时,指修改之后的source
+    private SourceMessageVO source;
 
-    /**
-     * 目录路径
-     */
-    @NotBlank(message = "目录路径不能为空")
-    private String path;
+    // 删除时,指被删除的source
+    // 修改时,指修改前的source
+    private SourceMessageVO oldSource;
 
-    /**
-     * 源类型
-     * 枚举 {@link cn.iocoder.yudao.module.space.enums.DictTypeConstants}
-     */
-    @NotNull(message = "源类型不能为空")
-    private Integer type;
-
-    /**
-     * 旧的源目录路径（仅用于更新）
-     */
-    private String oldPath;
 }

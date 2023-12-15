@@ -1,5 +1,7 @@
 package cn.iocoder.yudao.module.space.service.source;
 
+import cn.iocoder.yudao.module.space.dal.dataobject.directory.DirectoryDO;
+import org.apache.commons.io.file.SimplePathVisitor;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -15,8 +17,13 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 
 import javax.annotation.Resource;
 import org.springframework.context.annotation.Import;
+
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.time.LocalDateTime;
+import java.util.concurrent.*;
 
 import static cn.hutool.core.util.RandomUtil.*;
 import static cn.iocoder.yudao.module.space.enums.ErrorCodeConstants.*;

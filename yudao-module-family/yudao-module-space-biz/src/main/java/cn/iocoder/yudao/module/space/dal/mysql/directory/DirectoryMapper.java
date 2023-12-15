@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,6 +73,16 @@ public interface DirectoryMapper extends BaseMapperX<DirectoryDO> {
                 .eq(DirectoryDO::getSourceId, sourceId));
     }
 
+    default DirectoryDO selectBySubDirectoryName(Long sourceId, Path oldSourceRootPath, Path newPath) {
+        // 要找的节点所在的level,注意根节点level为1
+        return selectOne(new LambdaQueryWrapperX<DirectoryDO>()
+                .eq(DirectoryDO::getSourceId, sourceId)
+                .eq(DirectoryDO::getLevel, newPath.getNameCount() - oldSourceRootPath.getNameCount() + 1) // 目录所在层级
+                .eq(DirectoryDO::getName, newPath.getFileName().toString())  // 目录名
+                .last("limit 1")
+        );
+    }
+
     default String getFullPath(DirectoryDO directory){
         List<DirectoryDO> list = selectList(new LambdaQueryWrapperX<DirectoryDO>()
                 .eq(DirectoryDO::getSourceId, directory.getSourceId())
@@ -81,5 +92,15 @@ public interface DirectoryMapper extends BaseMapperX<DirectoryDO> {
                 .orderByAsc(DirectoryDO::getLft)
         );
         return list.stream().map(DirectoryDO::getName).collect(Collectors.joining(File.separator));
+    }
+
+    default DirectoryDO selectRoot(Long sourceId){
+        // 要找的节点所在的level,注意根节点level为1
+        return selectOne(new LambdaQueryWrapperX<DirectoryDO>()
+                .eq(DirectoryDO::getSourceId, sourceId)
+                .eq(DirectoryDO::getLevel, 1) // 目录所在层级
+                .eq(DirectoryDO::getLft, 1L)  // root目录的左值lft
+                .last("limit 1")
+        );
     }
 }
