@@ -1,7 +1,8 @@
-package cn.iocoder.yudao.module.space.service.directory;
+package cn.iocoder.yudao.module.space.test.directory;
 
 import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.framework.test.core.ut.BaseMockitoUnitTest;
+import cn.iocoder.yudao.module.space.service.directory.DirectoryServiceImpl;
 import com.alibaba.druid.util.StringUtils;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Directory;

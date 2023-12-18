@@ -1,8 +1,8 @@
-package cn.iocoder.yudao.module.space.service.permission;
+package cn.iocoder.yudao.module.space.test.permission;
 
+import cn.iocoder.yudao.module.space.service.permission.DirectoryPermissionServiceImpl;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import javax.annotation.Resource;
 
@@ -13,20 +13,13 @@ import cn.iocoder.yudao.module.space.dal.dataobject.permission.DirectoryPermissi
 import cn.iocoder.yudao.module.space.dal.mysql.permission.DirectoryPermissionMapper;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 
-import javax.annotation.Resource;
 import org.springframework.context.annotation.Import;
-import java.util.*;
-import java.time.LocalDateTime;
-
-import static cn.hutool.core.util.RandomUtil.*;
 import static cn.iocoder.yudao.module.space.enums.ErrorCodeConstants.*;
 import static cn.iocoder.yudao.framework.test.core.util.AssertUtils.*;
 import static cn.iocoder.yudao.framework.test.core.util.RandomUtils.*;
 import static cn.iocoder.yudao.framework.common.util.date.LocalDateTimeUtils.*;
 import static cn.iocoder.yudao.framework.common.util.object.ObjectUtils.*;
-import static cn.iocoder.yudao.framework.common.util.date.DateUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 /**
  * {@link DirectoryPermissionServiceImpl} 的单元测试类

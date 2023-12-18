@@ -1,28 +1,26 @@
-package cn.iocoder.yudao.module.space.service.source;
+package cn.iocoder.yudao.module.space.test.source;
 
-import cn.iocoder.yudao.module.space.dal.dataobject.directory.DirectoryDO;
-import org.apache.commons.io.file.SimplePathVisitor;
+import cn.iocoder.yudao.framework.tenant.core.context.TenantContextHolder;
+import cn.iocoder.yudao.framework.test.core.ut.BaseDbAndRedisUnitTest;
+import cn.iocoder.yudao.module.space.dal.redis.no.MessageNoRedisDAO;
+import cn.iocoder.yudao.module.space.mq.producer.SourceProducer;
+import cn.iocoder.yudao.module.space.service.source.SourceServiceImpl;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import javax.annotation.Resource;
 
-import cn.iocoder.yudao.framework.test.core.ut.BaseDbUnitTest;
 
 import cn.iocoder.yudao.module.space.controller.admin.source.vo.*;
 import cn.iocoder.yudao.module.space.dal.dataobject.source.SourceDO;
 import cn.iocoder.yudao.module.space.dal.mysql.source.SourceMapper;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 
-import javax.annotation.Resource;
 import org.springframework.context.annotation.Import;
 
-import java.io.IOException;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
-import java.time.LocalDateTime;
 import java.util.concurrent.*;
 
 import static cn.hutool.core.util.RandomUtil.*;
@@ -31,17 +29,16 @@ import static cn.iocoder.yudao.framework.test.core.util.AssertUtils.*;
 import static cn.iocoder.yudao.framework.test.core.util.RandomUtils.*;
 import static cn.iocoder.yudao.framework.common.util.date.LocalDateTimeUtils.*;
 import static cn.iocoder.yudao.framework.common.util.object.ObjectUtils.*;
-import static cn.iocoder.yudao.framework.common.util.date.DateUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 /**
  * {@link SourceServiceImpl} 的单元测试类
  *
  * @author 芋道源码
  */
-@Import(SourceServiceImpl.class)
-public class SourceServiceImplTest extends BaseDbUnitTest {
+@Import({SourceServiceImpl.class, SourceProducer.class, RocketMQTemplate.class, MessageNoRedisDAO.class})
+@Slf4j
+public class SourceServiceImplTest extends BaseDbAndRedisUnitTest {
 
     @Resource
     private SourceServiceImpl sourceService;
@@ -140,6 +137,94 @@ public class SourceServiceImplTest extends BaseDbUnitTest {
        assertEquals(1, pageResult.getTotal());
        assertEquals(1, pageResult.getList().size());
        assertPojoEquals(dbSource, pageResult.getList().get(0));
+    }
+
+
+    @Test
+    public void testSourceChange() {
+        String basePath = "/Users/qzh/private/";
+        String[] sources = new String[]{
+                "15号周沁晨",
+                "SONY",
+                "SONY/VOICE",
+                "SONY/VOICE/FOLDER01",
+                "SONY/eg",
+                "SONY/ep",
+                "testPhoto",
+                "testPhoto/ycy",
+                "testPhoto/周沁晨🌹"
+        };
+        List<Long> ids = new ArrayList<>();
+
+        Long tenantId = 1L;
+
+        TenantContextHolder.setTenantId(tenantId);
+        TenantContextHolder.setIgnore(false);
+
+        int times= 30;
+        CountDownLatch countDownLatch = new CountDownLatch(times);
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(10, 10, 0L,
+                TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        try {
+            for (int i = 0; i < sources.length; i++) {
+                for (int j = 1; j <= 3; j++) {
+                    Long id = sourceService.createSource(new SourceSaveReqVO().setPath(basePath + sources[i]).setType(j));
+                    if (id != null) {
+                        ids.add(id);
+                    }
+                }
+            }
+        } catch (Exception e) {
+//            throw new RuntimeException(e);
+        }
+
+        if (ids.size() == 0){
+            return;
+        }
+
+        for (int i = 0; i < times; i++) {
+            int finalI = i;
+            executor.execute(() -> {
+                try {
+                    log.info("开始....{}", finalI);
+                    TenantContextHolder.setTenantId(tenantId);
+                    TenantContextHolder.setIgnore(false);
+                    // mock 数据
+                    randomSourceAction(randomSourcePojo(ids, sources, basePath));
+                    log.info("结束....{}", finalI);
+                } catch (Exception e) {
+//                    throw new RuntimeException(e);
+                } finally {
+                    countDownLatch.countDown();
+                }
+            });
+        }
+
+        try {
+            countDownLatch.await();
+            log.info("结束....");
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private void randomSourceAction(SourceSaveReqVO dbSource) {
+        int i = randomInt(1,3);
+        switch (i) {
+            case 1:
+                sourceService.createSource(dbSource.setId(null));
+                break;
+            case 2:
+                sourceService.updateSource(dbSource);
+                break;
+            case 3:
+                sourceService.deleteSource(dbSource.getId());
+        }
+    }
+
+    private SourceSaveReqVO randomSourcePojo(List<Long> ids, String[] sources, String basePath) {
+        return new SourceSaveReqVO().setId(randomEle(ids)).setPath(basePath+randomEle(sources)).setType(randomInt(1,3));
     }
 
 }
