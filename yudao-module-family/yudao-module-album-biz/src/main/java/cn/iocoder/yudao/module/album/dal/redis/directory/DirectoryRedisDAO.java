@@ -17,7 +17,7 @@ public class DirectoryRedisDAO {
 
     public void setDirectoryOperated(Long directoryId, Integer messageType) {
         String redisKey = String.format(RedisKeyConstants.DIRECTORY_OPERATED , directoryId);
-        stringRedisTemplate.opsForValue().set(redisKey, String.valueOf(messageType), 1L , TimeUnit.HOURS);
+        stringRedisTemplate.opsForValue().set(redisKey, String.valueOf(messageType), 10L , TimeUnit.MINUTES);
     }
 
     public boolean hasDirectoryOperated(Long directoryId, String messageType) {
