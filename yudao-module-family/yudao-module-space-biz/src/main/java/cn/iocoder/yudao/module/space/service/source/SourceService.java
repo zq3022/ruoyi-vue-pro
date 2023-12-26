@@ -1,11 +1,11 @@
 package cn.iocoder.yudao.module.space.service.source;
 
-import java.util.*;
 import javax.validation.*;
 import cn.iocoder.yudao.module.space.controller.admin.source.vo.*;
 import cn.iocoder.yudao.module.space.dal.dataobject.source.SourceDO;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.framework.common.pojo.PageParam;
+
+import java.util.List;
 
 /**
  * 目录源 Service 接口
@@ -52,4 +52,10 @@ public interface SourceService {
      */
     PageResult<SourceDO> getSourcePage(SourcePageReqVO pageReqVO);
 
+    /**
+     * 获得目录源的所有类型
+     *
+     * @return 目录源类型list
+     */
+    List<Integer> listSourceTypes();
 }

@@ -9,7 +9,11 @@ import cn.iocoder.yudao.module.space.dal.dataobject.source.SourceDO;
 import cn.iocoder.yudao.module.space.dal.mysql.source.SourceMapper;
 import cn.iocoder.yudao.module.space.mq.message.source.SourceMessage;
 import cn.iocoder.yudao.module.space.mq.producer.SourceProducer;
+import cn.iocoder.yudao.module.space.watch.SourceWatch;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -36,12 +40,20 @@ public class SourceServiceImpl implements SourceService {
     @Resource
     private SourceProducer sourceChangeProducer;
 
+    @Resource
+    @Lazy
+    private SourceWatch sourceWatch;
+
     @Override
     public Long createSource(SourceSaveReqVO createReqVO) {
         // 插入
         checkSourceExistSub(null, createReqVO.getPath(), createReqVO.getType());
         SourceDO source = BeanUtils.toBean(createReqVO, SourceDO.class);
         sourceMapper.insert(source);
+
+        // 监听源目录的文件变更
+        sourceWatch.addListener(source.getId(), createReqVO.getType(), createReqVO.getPath());
+
         // 发送`新增源`的mq消息
         sourceChangeProducer.sendSourceAddMessage(new SourceMessage()
                 .setSource(SourceConvert.INSTANCE.convert(source)
@@ -58,6 +70,14 @@ public class SourceServiceImpl implements SourceService {
         // 更新
         SourceDO updateObj = BeanUtils.toBean(updateReqVO, SourceDO.class);
         sourceMapper.updateById(updateObj);
+
+        // 修改文件监听
+        SourceDO newSource = sourceMapper.selectById(updateObj.getId());
+        if (!updateObj.getPath().equals(oldSource.getPath()) || !newSource.getType().equals(newSource.getType())) {
+            sourceWatch.removeListener(oldSource.getId(), oldSource.getType());
+            sourceWatch.addListener(newSource.getId(), newSource.getType(), newSource.getPath());
+        }
+
         // 发送`修改源`mq消息
         sourceChangeProducer.sendSourceUpdateMessage(new SourceMessage()
                 .setSource(SourceConvert.INSTANCE.convert(sourceMapper.selectById(oldSource.getId())))
@@ -70,6 +90,10 @@ public class SourceServiceImpl implements SourceService {
         SourceDO oldSource = validateSourceExists(id);
         // 删除
         sourceMapper.deleteById(id);
+
+        // 删除文件监听
+        sourceWatch.removeListener(oldSource.getId(), oldSource.getType());
+
         // 发送`删除源`mq消息
         sourceChangeProducer.sendSourceDeleteMessage(new SourceMessage()
                 .setOldSource(SourceConvert.INSTANCE.convert(oldSource)
@@ -102,4 +126,8 @@ public class SourceServiceImpl implements SourceService {
         return sourceMapper.selectPage(pageReqVO);
     }
 
+    @Override
+    public List<Integer> listSourceTypes() {
+        return sourceMapper.listSourceTypes();
+    }
 }
