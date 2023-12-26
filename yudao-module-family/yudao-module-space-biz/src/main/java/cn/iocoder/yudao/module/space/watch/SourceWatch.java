@@ -44,19 +44,18 @@ public class SourceWatch {
             FileListener fileListener = new FileListener(source.getId(), source.getType(), source.getPath());
 
             observer.addListener(fileListener);
+            try {
+                log.info("[init][type({}) 开启监控]", source.getType());
+                monitor.start();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
             monitor.addObserver(observer);
 
             observerMap.put(source.getId(), observer);
             listenerMap.put(source.getId(), fileListener);
         });
 
-        types.forEach(t -> {
-            try {
-                monitorMap.get(t).start();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
     }
 
     @PreDestroy
