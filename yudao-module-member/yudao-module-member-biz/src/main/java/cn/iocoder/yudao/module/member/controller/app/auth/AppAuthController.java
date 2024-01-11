@@ -49,6 +49,12 @@ public class AppAuthController {
         return success(authService.login(reqVO));
     }
 
+    @PostMapping("/mobile-exist")
+    @Operation(summary = "手机号是否已被注册")
+    public CommonResult<AppAuthMobileExistRespVO> mobileExist(@RequestBody @Valid AppAuthMobileExistReqVO reqVO) {
+        return success(authService.mobileExist(reqVO));
+    }
+
     @PostMapping("/logout")
     @PermitAll
     @Operation(summary = "登出系统")

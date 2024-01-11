@@ -76,6 +76,28 @@ public class MemberAuthServiceImpl implements MemberAuthService {
         return createTokenAfterLoginSuccess(user, reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE, openid);
     }
 
+    /**
+     * 手机号是否已被注册
+     *
+     * @param reqVO 手机号信息
+     * @return 登录结果
+     */
+    public AppAuthMobileExistRespVO mobileExist(AppAuthMobileExistReqVO reqVO){
+        MemberUserDO user = userService.getUserByMobile(reqVO.getMobile());
+        if (ObjectUtil.isNull(user)) {
+            return AppAuthMobileExistRespVO.builder()
+                    .exist(0)
+                    .build();
+        } else {
+            return AppAuthMobileExistRespVO.builder()
+                    .exist(1)
+                    .nickname(user.getNickname())
+                    .hasPassword(user.getPassword()!= null)
+                    .build();
+        }
+    }
+
+
     @Override
     @Transactional
     public AppAuthLoginRespVO smsLogin(AppAuthSmsLoginReqVO reqVO, Integer terminal) {
