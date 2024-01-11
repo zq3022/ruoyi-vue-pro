@@ -18,11 +18,9 @@ public class DirectorySaveReqVO {
     private Long sourceId;
 
     @Schema(description = "左索引", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "左索引不能为空")
     private Long lft;
 
     @Schema(description = "右索引", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "右索引不能为空")
     private Long rgt;
 
     @Schema(description = "层级", requiredMode = Schema.RequiredMode.REQUIRED)

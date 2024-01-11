@@ -33,8 +33,41 @@ public interface DirectoryMapper extends BaseMapperX<DirectoryDO> {
                 .orderByDesc(DirectoryDO::getId));
     }
 
+    /**
+     * 删除整颗树
+     * @param sourceId 源目录id
+     */
     default void deleteBySource(Long sourceId) {
         delete(new LambdaQueryWrapperX<DirectoryDO>().eq(DirectoryDO::getSourceId, sourceId));
+    }
+
+
+    /**
+     * 删除当前目录节点及其所有子节点
+     * 注意：删除之后并不调整subTree的lft、rgt、level
+     * @param directory 目录节点
+     */
+    default List<DirectoryDO> deleteSubTree(DirectoryDO directory) {
+        LambdaQueryWrapper<DirectoryDO> queryWrapperX = new LambdaQueryWrapperX<DirectoryDO>()
+                .eq(DirectoryDO::getSourceId, directory.getSourceId())
+                .and(w -> w.ge(DirectoryDO::getLft, directory.getLft())
+                        .or()
+                        .le(DirectoryDO::getRgt, directory.getRgt()));
+        List<DirectoryDO> deletedList = selectList(queryWrapperX);
+        delete(queryWrapperX);
+        return deletedList;
+    }
+    /**
+     * 用于调整树, after删除子树之后
+     * @param sourceId 源id
+     * @param leftOffset lft偏移量
+     */
+    default void reconstructedOffsetAfterDeleteSubTree(Long sourceId, Long leftOffset){
+        update(new LambdaUpdateWrapper<DirectoryDO>()
+                .eq(DirectoryDO::getSourceId, sourceId)
+                .setSql("lft = lft - {0}", leftOffset)
+                .setSql("rgt = rgt - {0}", leftOffset)
+        );
     }
 
     /**
@@ -45,16 +78,15 @@ public interface DirectoryMapper extends BaseMapperX<DirectoryDO> {
     default List<DirectoryDO> deleteParentsAndSiblingsBySubTreeRoot(DirectoryDO subTreeRoot) {
         LambdaQueryWrapper<DirectoryDO> queryWrapperX = new LambdaQueryWrapperX<DirectoryDO>()
                 .eq(DirectoryDO::getSourceId, subTreeRoot.getSourceId())
-                .and(w -> w.gt(DirectoryDO::getRgt, subTreeRoot.getRgt())
+                .and(w -> w.lt(DirectoryDO::getLft, subTreeRoot.getLft())
                         .or()
-                        .lt(DirectoryDO::getLft, subTreeRoot.getLft()));
+                        .gt(DirectoryDO::getRgt, subTreeRoot.getRgt()));
         List<DirectoryDO> deletedList = selectList(queryWrapperX);
         delete(queryWrapperX);
         return deletedList;
     }
-
     /**
-     * 用于删除所有的父节点和兄弟节点，之后的lft、rgt、level调整\
+     * 用于调整树, after删除所有的父节点和兄弟节点
      * @param sourceId 源id
      * @param leftOffset lft偏移量
      * @param levelOffset level偏移量

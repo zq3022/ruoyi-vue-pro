@@ -28,10 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.space.enums.ErrorCodeConstants.DIRECTORY_NOT_EXISTS;
@@ -53,7 +50,14 @@ public class DirectoryServiceImpl implements DirectoryService {
     @Resource
     private DirectoryProducer directoryProducer;
 
+    /**
+     * 创建目录,不包含子文件夹
+     *
+     * @param createReqVO 创建目录 Request VO
+     * @return 目录编号
+     */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long createDirectory(DirectorySaveReqVO createReqVO) {
         // 插入
         DirectoryDO directory = BeanUtils.toBean(createReqVO, DirectoryDO.class);
@@ -63,6 +67,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateDirectory(DirectorySaveReqVO updateReqVO) {
         // 校验存在
         validateDirectoryExists(updateReqVO.getId());
@@ -72,11 +77,31 @@ public class DirectoryServiceImpl implements DirectoryService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteDirectory(Long id) {
         // 校验存在
         validateDirectoryExists(id);
-        // 删除
-        directoryMapper.deleteById(id);
+        // 要修剪的树枝
+        DirectoryDO directory = directoryMapper.selectById(id);
+        // 调整树并删除该目录节点
+        List<DirectoryDO> deletedCol= pruneTree(directory);
+
+        // 发送文件夹被删除的消息
+        if (!deletedCol.isEmpty()) {
+            Optional.ofNullable(sourceService.getSource(directory.getSourceId())).ifPresent(source -> {
+                directoryProducer.sendDeletedMessages(deletedCol, source.getId(), source.getType());
+            });
+        }
+    }
+
+    /**
+     * 修剪树枝
+     * @param directory 要删除的目录节点
+     */
+    private List<DirectoryDO> pruneTree(DirectoryDO directory) {
+        List<DirectoryDO> directoryDeleteList = directoryMapper.deleteSubTree(directory);
+        directoryMapper.reconstructedOffsetAfterDeleteSubTree(directory.getSourceId(), directory.getRgt() - directory.getLft() + 1);
+        return directoryDeleteList;
     }
 
     private void validateDirectoryExists(Long id) {
