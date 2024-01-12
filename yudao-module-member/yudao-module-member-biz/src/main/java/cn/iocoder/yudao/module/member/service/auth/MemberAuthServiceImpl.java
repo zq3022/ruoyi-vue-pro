@@ -96,7 +96,24 @@ public class MemberAuthServiceImpl implements MemberAuthService {
                     .build();
         }
     }
+    @Override
+    public AppAuthLoginRespVO signUp(AppAuthLoginReqVO reqVO, Integer terminal) {
+        // 检查手机号是否已被使用
+        String userIp = getClientIP();
+        // 获得获得注册用户
+        MemberUserDO user = userService.createUserIfAbsent(reqVO.getMobile(), reqVO.getPassword(), userIp, terminal);
+        Assert.notNull(user, "获取用户失败，结果为空");
 
+        // 如果 socialType 非空，说明需要绑定社交用户
+        String openid = null;
+        if (reqVO.getSocialType() != null) {
+            openid = socialUserApi.bindSocialUser(new SocialUserBindReqDTO(user.getId(), getUserType().getValue(),
+                    reqVO.getSocialType(), reqVO.getSocialCode(), reqVO.getSocialState()));
+        }
+
+        // 创建 Token 令牌，记录登录日志
+        return createTokenAfterLoginSuccess(user, reqVO.getMobile(), LoginLogTypeEnum.LOGIN_MOBILE, openid);
+    }
 
     @Override
     @Transactional

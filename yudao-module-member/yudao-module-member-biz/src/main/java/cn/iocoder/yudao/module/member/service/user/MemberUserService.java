@@ -47,6 +47,7 @@ public interface MemberUserService {
      * @param terminal   终端 {@link TerminalEnum}
      * @return 用户对象
      */
+    MemberUserDO createUserIfAbsent(@Mobile String mobile, String password, String registerIp, Integer terminal);
     MemberUserDO createUserIfAbsent(@Mobile String mobile, String registerIp, Integer terminal);
 
     /**

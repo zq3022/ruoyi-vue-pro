@@ -37,6 +37,14 @@ public interface MemberAuthService {
      */
     void logout(String token);
 
+    /** 注册
+     *
+     * @param reqVO 注册信息
+     * @param terminal 终端 {@link TerminalEnum}
+     * @return 登录结果
+     */
+    AppAuthLoginRespVO signUp(@Valid AppAuthLoginReqVO reqVO, Integer terminal);
+
     /**
      * 手机 + 验证码登陆
      *

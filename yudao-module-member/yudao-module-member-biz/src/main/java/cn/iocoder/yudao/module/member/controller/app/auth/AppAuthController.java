@@ -55,6 +55,12 @@ public class AppAuthController {
         return success(authService.mobileExist(reqVO));
     }
 
+    @PostMapping("/sign-up")
+    @Operation(summary = "使用手机 + 密码注册")
+    public CommonResult<AppAuthLoginRespVO> signUp(@RequestBody @Valid AppAuthLoginReqVO reqVO, @RequestHeader Integer terminal) {
+        return success(authService.signUp(reqVO, terminal));
+    }
+
     @PostMapping("/logout")
     @PermitAll
     @Operation(summary = "登出系统")

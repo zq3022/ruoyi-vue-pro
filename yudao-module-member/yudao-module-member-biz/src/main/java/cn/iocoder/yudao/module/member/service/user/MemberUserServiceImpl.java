@@ -21,6 +21,7 @@ import cn.iocoder.yudao.module.member.mq.producer.user.MemberUserProducer;
 import cn.iocoder.yudao.module.system.api.sms.SmsCodeApi;
 import cn.iocoder.yudao.module.system.api.sms.dto.code.SmsCodeUseReqDTO;
 import cn.iocoder.yudao.module.system.enums.sms.SmsSceneEnum;
+import com.alibaba.excel.util.StringUtils;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -73,24 +74,31 @@ public class MemberUserServiceImpl implements MemberUserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public MemberUserDO createUserIfAbsent(String mobile, String registerIp, Integer terminal) {
+    public MemberUserDO createUserIfAbsent(String mobile,  String registerIp, Integer terminal) {
+        // 用户不存在，则进行创建
+        return createUserIfAbsent(mobile, null, registerIp, terminal);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public MemberUserDO createUserIfAbsent(String mobile, String password, String registerIp, Integer terminal) {
         // 用户已经存在
         MemberUserDO user = memberUserMapper.selectByMobile(mobile);
         if (user != null) {
             return user;
         }
         // 用户不存在，则进行创建
-        return createUser(mobile, registerIp, terminal);
+        return createUser(mobile, password, registerIp, terminal);
     }
 
-    private MemberUserDO createUser(String mobile, String registerIp, Integer terminal) {
+    private MemberUserDO createUser(String mobile, String password, String registerIp, Integer terminal) {
         // 生成密码
-        String password = IdUtil.fastSimpleUUID();
+        String pwd = StrUtil.isBlank(password) ? IdUtil.fastSimpleUUID() : StrUtil.trim(password);
         // 插入用户
         MemberUserDO user = new MemberUserDO();
         user.setMobile(mobile);
         user.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
-        user.setPassword(encodePassword(password)); // 加密密码
+        user.setPassword(encodePassword(pwd)); // 加密密码
         user.setRegisterIp(registerIp);
         user.setRegisterTerminal(terminal);
         memberUserMapper.insert(user);
