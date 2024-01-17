@@ -192,6 +192,8 @@ logging:
     cn.iocoder.yudao.module.album.dal.mysql: debug
     cn.iocoder.yudao.module.video.dal.mysql: debug
     cn.iocoder.yudao.module.music.dal.mysql: debug
+    cn.iocoder.yudao.module.cf.dal.mysql: debug
+
 
 debug: false
 
