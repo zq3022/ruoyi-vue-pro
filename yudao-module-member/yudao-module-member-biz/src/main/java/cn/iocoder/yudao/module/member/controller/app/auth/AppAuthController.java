@@ -61,6 +61,15 @@ public class AppAuthController {
         return success(authService.signUp(reqVO, terminal));
     }
 
+    @PostMapping("/is-login")
+    @PermitAll
+    @Operation(summary = "是否登录")
+    public CommonResult<Boolean> isLogin(HttpServletRequest request) {
+        String token = SecurityFrameworkUtils.obtainAuthorization(request,
+                securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
+        return success(authService.isLogin(token));
+    }
+
     @PostMapping("/logout")
     @PermitAll
     @Operation(summary = "登出系统")

@@ -103,4 +103,5 @@ public interface MemberAuthService {
      */
     AppAuthLoginRespVO refreshToken(String refreshToken);
 
+    Boolean isLogin(String token);
 }

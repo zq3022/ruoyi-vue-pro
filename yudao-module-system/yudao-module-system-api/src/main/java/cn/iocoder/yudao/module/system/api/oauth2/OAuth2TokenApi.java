@@ -30,6 +30,14 @@ public interface OAuth2TokenApi {
     OAuth2AccessTokenCheckRespDTO checkAccessToken(String accessToken);
 
     /**
+     * 获取访问令牌信息
+     *
+     * @param accessToken 访问令牌
+     * @return 访问令牌的信息
+     */
+    OAuth2AccessTokenCheckRespDTO getAccessToken(String accessToken);
+
+    /**
      * 移除访问令牌
      *
      * @param accessToken 访问令牌

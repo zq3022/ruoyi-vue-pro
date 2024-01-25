@@ -35,6 +35,12 @@ public class OAuth2TokenApiImpl implements OAuth2TokenApi {
     }
 
     @Override
+    public OAuth2AccessTokenCheckRespDTO getAccessToken(String accessToken) {
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.getAccessToken(accessToken);
+        return BeanUtils.toBean(accessTokenDO, OAuth2AccessTokenCheckRespDTO.class);
+    }
+
+    @Override
     public OAuth2AccessTokenRespDTO removeAccessToken(String accessToken) {
         OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.removeAccessToken(accessToken);
         return BeanUtils.toBean(accessTokenDO, OAuth2AccessTokenRespDTO.class);

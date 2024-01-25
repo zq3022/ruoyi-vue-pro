@@ -17,4 +17,6 @@ public interface ErrorCodeConstants {
     ErrorCode PLAYLIST_NOT_EXISTS = new ErrorCode(1_111_003_000, "歌单不存在");
     // ========== 歌曲 1_111_004_000 ==========
     ErrorCode SONG_NOT_EXISTS = new ErrorCode(1_111_004_000, "歌曲不存在");
+    // ========== 歌曲 1_111_005_000 ==========
+    ErrorCode USER_NOT_EXISTS = new ErrorCode(1_111_005_000, "cf用户不存在");
 }
