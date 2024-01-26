@@ -25,7 +25,7 @@ import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 public class CfUserDO extends BaseDO {
 
     /**
-     * 歌曲id
+     * cf用户id
      */
     @TableId
     private Long id;

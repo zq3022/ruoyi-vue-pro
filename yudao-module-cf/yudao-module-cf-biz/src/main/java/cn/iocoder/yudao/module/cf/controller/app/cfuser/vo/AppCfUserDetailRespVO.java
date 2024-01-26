@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Schema(description = "CF用户 APP - 用户详情 Response VO")
 @Data
@@ -22,7 +22,7 @@ public class AppCfUserDetailRespVO {
 //    private int bindings;
     private Boolean adValid = false;
     private int code = 0;
-    private Date createTime;
-    private int createDays = 0;
+    private LocalDateTime createTime;
+//    private int createDays = 0;
 //    private int profileVillageInfo;
 }
