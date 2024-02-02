@@ -237,6 +237,10 @@ yudao:
       - rep_demo_jianpiao
       - tmp_report_data_1
       - tmp_report_data_income
+      - cf_album_artist
+      - cf_playlist_song
+      - cf_song_artist
+      - cf_user_playlist
   sms-code: # 短信验证码相关的配置项
     expire-times: 10m
     send-frequency: 1m

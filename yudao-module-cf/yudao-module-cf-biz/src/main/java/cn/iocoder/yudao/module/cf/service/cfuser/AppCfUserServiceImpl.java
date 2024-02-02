@@ -47,8 +47,10 @@ public class AppCfUserServiceImpl implements AppCfUserService {
         MemberUserDO user = userService.getUser(userId);
         MemberLevelDO level = levelService.getLevel(user.getLevelId());
         AppCfUserDetailRespVO resp = new AppCfUserDetailRespVO()
-                .setLevel(level.getLevel())
                 .setUserPoint(new AppCfUserPointRespVO().setBalance(user.getPoint()).setUserId(userId));
+        if (level != null) {
+            resp.setLevel(level.getLevel());
+        }
         resp.setProfile(CfUserConverter.INSTANCE.convert(cfUser));
         return resp;
     }

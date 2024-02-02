@@ -16,6 +16,10 @@ public class AppCfUserProfileRespVO {
     /**
      * 用户编号
      */
+    private Long id;
+    /**
+     * 用户编号
+     */
     private Long userId;
     /**
      * 用户类型
