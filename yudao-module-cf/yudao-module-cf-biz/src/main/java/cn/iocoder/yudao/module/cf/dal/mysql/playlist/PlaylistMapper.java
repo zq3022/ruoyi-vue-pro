@@ -6,6 +6,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.module.cf.controller.app.cfuser.vo.AppCfUserProfileRespVO;
+import cn.iocoder.yudao.module.cf.controller.app.playlist.vo.AppCfPlaylistDetailReqVO;
 import cn.iocoder.yudao.module.cf.controller.app.playlist.vo.AppCfPlaylistPageReqVO;
 import cn.iocoder.yudao.module.cf.controller.app.playlist.vo.AppCfPlaylistRespVO;
 import cn.iocoder.yudao.module.cf.dal.dataobject.cfuser.CfUserDO;
@@ -58,28 +59,39 @@ public interface PlaylistMapper extends BaseMapperX<PlaylistDO> {
                 .orderByDesc(PlaylistDO::getId));
     }
 
-    default Boolean hasMoreOffsetPage(AppCfPlaylistPageReqVO reqVO) {
+    default Boolean hasMoreOffsetPage(AppCfPlaylistPageReqVO reqVO, Long userId) {
         Long count = selectCount(MPJWrappers.lambdaJoin(PlaylistDO.class)
                 .select(PlaylistDO::getId)
-                .rightJoin(String.format("cf_user_playlist up on up.playlist_id = t.id and up.user_id = %d", reqVO.getUserId()))
+                .rightJoin(String.format("cf_user_playlist up on up.playlist_id = t.id and up.user_id = %d", userId))
                 .gt(PlaylistDO::getId, reqVO.getOffset())
                 .orderByDesc(PlaylistDO::getId)
         );
         return count > reqVO.getLimit();
     }
 
-    default List<AppCfPlaylistRespVO> getPlaylistOffsetPage(AppCfPlaylistPageReqVO reqVO){
+    default List<AppCfPlaylistRespVO> getPlaylistOffsetPage(AppCfPlaylistPageReqVO reqVO, Long userId){
          List<AppCfPlaylistRespVO> list = selectJoinList(AppCfPlaylistRespVO.class, MPJWrappers.lambdaJoin(PlaylistDO.class)
                  .selectAll(PlaylistDO.class)
                  .selectAssociation(CfUserDO.class, AppCfPlaylistRespVO::getPlayListCreator)
-                 .innerJoin("cf_user_playlist up on up.playlist_id = t.id")
+                 .innerJoin(String.format("cf_user_playlist up on up.playlist_id = t.id and up.user_id = %d ", userId))
                  .leftJoin(CfUserDO.class, "u", CfUserDO::getUserId, PlaylistDO::getUserId)
                  .gt(PlaylistDO::getId, reqVO.getOffset())
-                 .eq("up.user_id", reqVO.getUserId())
+//                 .eq("up.user_id", reqVO.getUserId())
                  .orderByDesc(PlaylistDO::getId)
                  .last(String.format("limit %d", reqVO.getLimit()))
          );
          return list;
     }
 
+    default AppCfPlaylistRespVO getPlaylistDetail(AppCfPlaylistDetailReqVO detailReqVO, Long userId){
+        AppCfPlaylistRespVO vo = selectJoinOne(AppCfPlaylistRespVO.class, MPJWrappers.lambdaJoin(PlaylistDO.class)
+                .selectAll(PlaylistDO.class)
+                .selectAssociation(CfUserDO.class, AppCfPlaylistRespVO::getPlayListCreator)
+                .innerJoin(String.format("cf_user_playlist up on up.playlist_id = t.id and up.user_id = %d ", userId))
+                .leftJoin(CfUserDO.class, "u", CfUserDO::getUserId, PlaylistDO::getUserId)
+                .eq(PlaylistDO::getId, detailReqVO.getId())
+                .last("limit 1")
+        );
+        return vo;
+    }
 }

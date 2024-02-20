@@ -80,6 +80,7 @@ mybatis-plus:
 
 mybatis-plus-join:
   banner: false # 关闭控制台的 Banner 打印
+  logic-del-type: on
 
 # Spring Data Redis 配置
 spring:

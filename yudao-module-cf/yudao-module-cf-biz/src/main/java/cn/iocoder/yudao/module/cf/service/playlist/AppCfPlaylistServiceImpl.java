@@ -2,9 +2,7 @@ package cn.iocoder.yudao.module.cf.service.playlist;
 
 import cn.iocoder.yudao.framework.security.core.LoginUser;
 import cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils;
-import cn.iocoder.yudao.module.cf.controller.app.playlist.vo.AppCfPlaylistPageReqVO;
-import cn.iocoder.yudao.module.cf.controller.app.playlist.vo.AppCfPlaylistPageRespVO;
-import cn.iocoder.yudao.module.cf.controller.app.playlist.vo.AppCfPlaylistRespVO;
+import cn.iocoder.yudao.module.cf.controller.app.playlist.vo.*;
 import cn.iocoder.yudao.module.cf.dal.mysql.playlist.PlaylistMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -21,10 +19,15 @@ public class AppCfPlaylistServiceImpl implements AppCfPlaylistService {
     @Override
     public AppCfPlaylistPageRespVO getPlaylistPage(AppCfPlaylistPageReqVO pageReqVO) {
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
-        Assert.notNull(loginUser, "登录用户不能为空");
-        pageReqVO.setUserId(loginUser.getId());
-        boolean more = playlistMapper.hasMoreOffsetPage(pageReqVO);
-        List<AppCfPlaylistRespVO> playlist = playlistMapper.getPlaylistOffsetPage(pageReqVO);
+        boolean more = playlistMapper.hasMoreOffsetPage(pageReqVO, loginUser.getId());
+        List<AppCfPlaylistRespVO> playlist = playlistMapper.getPlaylistOffsetPage(pageReqVO, loginUser.getId());
         return new AppCfPlaylistPageRespVO().setPlaylist(playlist).setCode(200).setMore(more);
+    }
+
+    @Override
+    public AppCfPlaylistDetailRespVO getPlaylistDetail(AppCfPlaylistDetailReqVO detailReqVO) {
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        AppCfPlaylistRespVO playlist = playlistMapper.getPlaylistDetail(detailReqVO, loginUser.getId());
+        return new AppCfPlaylistDetailRespVO().setPlaylist(playlist).setCode(0);
     }
 }

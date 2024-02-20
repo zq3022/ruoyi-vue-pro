@@ -1,9 +1,9 @@
 package cn.iocoder.yudao.module.cf.controller.app.playlist.vo;
 
-import cn.iocoder.yudao.module.cf.controller.app.cfuser.vo.AppCfUserProfileRespVO;
 import cn.iocoder.yudao.module.cf.dal.dataobject.cfuser.CfUserDO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -128,5 +128,6 @@ public class AppCfPlaylistRespVO {
 
     @Schema(description = "歌单创建人", example = "2")
     @ExcelProperty("歌单创建人")
+    @JsonAlias("creator")
     private CfUserDO playListCreator ;
 }

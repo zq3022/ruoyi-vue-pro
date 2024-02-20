@@ -11,8 +11,4 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class AppCfPlaylistPageReqVO extends PageOffsetParam {
-
-    @Schema(description = "用户id", example = "28458")
-    private Long userId;
-
 }
